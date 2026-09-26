@@ -28,14 +28,20 @@ function readPath() {
 const state = {
   path: readPath(),
   menuOpen: false,
+  marqueePaused: false,
 }
+
+// Where to move focus after the next render. Null on the first paint so a
+// load does not steal focus from the browser chrome.
+let pendingFocus = null
 
 function projectBySlug(slug) {
   return projects.find((p) => p.slug === slug)
 }
 
-function navigate(path, { replace = false } = {}) {
+function navigate(path, { replace = false, focus = 'main' } = {}) {
   const next = normalizePath(path)
+  pendingFocus = focus
   if (next === state.path && !replace) {
     state.menuOpen = false
     render()
@@ -46,6 +52,12 @@ function navigate(path, { replace = false } = {}) {
   state.path = next
   state.menuOpen = false
   window.scrollTo({ top: 0, behavior: 'instant' })
+  render()
+}
+
+function setMenu(open, focus = open ? 'menu-open' : 'menu-close') {
+  state.menuOpen = open
+  pendingFocus = focus
   render()
 }
 
@@ -70,15 +82,35 @@ function matchRoute(path) {
   return { name: 'notfound' }
 }
 
-function logoMark(extraClass = '') {
-  return `<span class="logo ${extraClass}" data-link="/" role="link" tabindex="0">
-    <img src="/osware.png" alt="Osware" class="logo-img" />
-  </span>`
+function logoMark(extraClass = '', { inert = false } = {}) {
+  const classes = extraClass ? `logo ${extraClass}` : 'logo'
+  return `<a class="${classes}" href="/" data-link="/" aria-label="Osware, ana sayfa"${inert ? ' inert' : ''}>
+    <img src="/osware.png" alt="" class="logo-img" />
+  </a>`
+}
+
+function isNavActive(href, route) {
+  if (href === '/isler') return route.name === 'work' || route.name === 'project'
+  return state.path === href
+}
+
+function navAnchors() {
+  const route = matchRoute(state.path)
+  return nav
+    .map((item) => {
+      const active = isNavActive(item.href, route)
+      const current = active ? ' class="is-active" aria-current="page"' : ''
+      return `<a href="${item.href}" data-link="${item.href}"${current}>${item.label}</a>`
+    })
+    .join('')
 }
 
 function originLine() {
   const links = studio.previous
-    .map((item) => `<a href="${item.href}" target="_blank" rel="noreferrer">${item.name}</a>`)
+    .map(
+      (item) =>
+        `<a href="${item.href}" target="_blank" rel="noopener noreferrer">${item.name}<span class="visually-hidden"> (yeni sekmede)</span></a>`,
+    )
     .join(' ve ')
   return `Üçümüz ${links} çıkışlıyız.`
 }
@@ -97,7 +129,7 @@ function whatsappFab() {
     href="${studio.whatsappHref}"
     target="_blank"
     rel="noopener noreferrer"
-    aria-label="WhatsApp ile yazın"
+    aria-label="WhatsApp ile yazın (yeni sekmede)"${state.menuOpen ? ' inert' : ''}
   >
     <svg viewBox="0 0 24 24" aria-hidden="true">
       <path fill="currentColor" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.435 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/>
@@ -106,42 +138,37 @@ function whatsappFab() {
 }
 
 function renderHeader() {
-  const route = matchRoute(state.path)
-  const links = nav
-    .map((item) => {
-      const active =
-        item.href === '/isler'
-          ? route.name === 'work' || route.name === 'project'
-          : state.path === item.href
-      return `<a href="${item.href}" data-link="${item.href}" class="${active ? 'is-active' : ''}">${item.label}</a>`
-    })
-    .join('')
+  const open = state.menuOpen
+  const inert = open ? ' inert' : ''
+  const links = navAnchors()
+  const menuLabel = open ? 'Menüyü kapat' : 'Menüyü aç'
 
   return `
-    <a class="skip" href="#view">İçeriğe geç</a>
+    <a class="skip" href="#view"${inert}>İçeriğe geç</a>
     <header class="site-header">
       <div class="header-inner">
-        ${logoMark()}
-        <nav class="desktop-nav" aria-label="Ana menü">${links}</nav>
+        ${logoMark('', { inert: open })}
+        <nav class="desktop-nav" aria-label="Ana menü"${inert}>${links}</nav>
         <div class="header-actions">
-          <a class="btn btn-sm header-cta" href="/iletisim" data-link="/iletisim">Proje başlat</a>
-          <button class="menu-btn" data-action="toggle-menu" aria-label="Menü" aria-expanded="${state.menuOpen}">
-            <span></span><span></span>
+          <a class="btn btn-sm header-cta" href="/iletisim" data-link="/iletisim"${inert}>Proje başlat</a>
+          <button type="button" class="menu-btn" data-action="toggle-menu" aria-controls="site-menu" aria-expanded="${open}" aria-haspopup="dialog" aria-label="${menuLabel}">
+            <span aria-hidden="true"></span><span aria-hidden="true"></span>
           </button>
         </div>
       </div>
     </header>
-    <div class="mobile-nav ${state.menuOpen ? 'is-open' : ''}">
+    <div id="site-menu" class="mobile-nav${open ? ' is-open' : ''}"${open ? ' role="dialog" aria-modal="true" aria-label="Menü"' : ' hidden'}>
       <nav aria-label="Mobil menü">${links}</nav>
       <a class="btn" href="/iletisim" data-link="/iletisim">Proje başlat</a>
     </div>
-    <div class="scrim ${state.menuOpen ? 'is-on' : ''}" data-action="close-overlays"></div>
+    <div class="scrim${open ? ' is-on' : ''}" data-action="close-overlays" aria-hidden="true"></div>
   `
 }
 
 function renderFooter() {
+  const inert = state.menuOpen ? ' inert' : ''
   return `
-    <footer class="site-footer">
+    <footer class="site-footer"${inert}>
       <div class="footer-cta">
         <p class="eyebrow">Kapasite</p>
         <h2>İş netse başlarız.</h2>
@@ -153,14 +180,24 @@ function renderFooter() {
           ${logoMark('logo-footer')}
           ${contactDetails()}
         </div>
-        <div>
-          <p class="eyebrow">Hat</p>
-          ${nav.map((l) => `<a href="${l.href}" data-link="${l.href}">${l.label}</a>`).join('')}
-        </div>
-        <div>
-          <p class="eyebrow">Ekip</p>
-          ${team.map((m) => `<a href="/ekip" data-link="/ekip">${m.name}</a>`).join('')}
-        </div>
+        <nav aria-label="Hat">
+          <p class="eyebrow" aria-hidden="true">Hat</p>
+          <ul class="footer-links">
+            ${nav
+              .map((item) => {
+                const active = isNavActive(item.href, matchRoute(state.path))
+                const current = active ? ' aria-current="page"' : ''
+                return `<li><a href="${item.href}" data-link="${item.href}"${current}>${item.label}</a></li>`
+              })
+              .join('')}
+          </ul>
+        </nav>
+        <nav aria-label="Ekip">
+          <p class="eyebrow" aria-hidden="true">Ekip</p>
+          <ul class="footer-links">
+            ${team.map((m) => `<li><a href="/ekip" data-link="/ekip">${m.name}</a></li>`).join('')}
+          </ul>
+        </nav>
         <div>
           <p class="eyebrow">Kuruluş ${studio.founded}</p>
           <p class="muted">Web geliştirme ve IT. ${studio.location}. Üç kişi, tek teslim.</p>
@@ -170,7 +207,8 @@ function renderFooter() {
   `
 }
 
-function workCard(p) {
+function workCard(p, level = 3) {
+  const title = level === 2 ? `<h2 class="card-title">${p.title}</h2>` : `<h3>${p.title}</h3>`
   return `
     <article class="card">
       <a class="card-media" href="/isler/${p.slug}" data-link="/isler/${p.slug}">
@@ -179,7 +217,7 @@ function workCard(p) {
       </a>
       <div class="card-body">
         <div>
-          <a href="/isler/${p.slug}" data-link="/isler/${p.slug}"><h3>${p.title}</h3></a>
+          <a href="/isler/${p.slug}" data-link="/isler/${p.slug}">${title}</a>
           <p class="muted">${p.context}</p>
         </div>
         <a class="text-btn" href="/isler/${p.slug}" data-link="/isler/${p.slug}">İncele</a>
@@ -193,7 +231,7 @@ function viewHome() {
     <section class="hero">
       <div class="hero-copy">
         <p class="eyebrow">Operasyon grubu · Web / IT</p>
-        <h1>İşleyen sistem<br>üretiriz.</h1>
+        <h1 id="page-title">İşleyen sistem<br>üretiriz.</h1>
         <p class="lede">Osware; Bumin, Aleyna ve Seda. ${studio.location} merkezli, web ve IT işini uçtan uca kapatan üç kişilik üretim hattı. ${originLine()}</p>
         <div class="hero-actions">
           <a class="btn" href="/isler" data-link="/isler">İşlere bak</a>
@@ -213,10 +251,19 @@ function viewHome() {
       </div>
     </section>
 
-    <div class="marquee" aria-hidden="true">
-      <div class="marquee-track">
+    <div class="visually-hidden">
+      <h2>Yetenekler</h2>
+      <ul>
+        ${capabilities.map((item) => `<li>${item}</li>`).join('')}
+      </ul>
+    </div>
+    <div class="marquee${state.marqueePaused ? ' is-paused' : ''}">
+      <div class="marquee-track" aria-hidden="true">
         ${Array(2).fill(`${capabilities.join(' · ')} · `).join('')}
       </div>
+      <button type="button" class="marquee-toggle" data-action="toggle-marquee" aria-pressed="${state.marqueePaused}">
+        ${state.marqueePaused ? 'Oynat' : 'Durdur'}<span class="visually-hidden"> animasyonu</span>
+      </button>
     </div>
 
     <section class="section">
@@ -280,11 +327,11 @@ function viewWork() {
   return `
     <section class="page-hero">
       <p class="eyebrow">Portföy</p>
-      <h1>İşler</h1>
+      <h1 id="page-title">İşler</h1>
       <p class="lede">Sahte katalog yok. Optiviser döneminde ürettiğimiz iki ürün ve Osware’in Kiosos’u — üçü de yayında.</p>
     </section>
     <div class="work-grid">
-      ${projects.map((p) => workCard(p)).join('')}
+      ${projects.map((p) => workCard(p, 2)).join('')}
     </div>
   `
 }
@@ -300,12 +347,12 @@ function viewProject(slug) {
       </div>
       <div class="case-info">
         <p class="eyebrow">${p.context}</p>
-        <h1>${p.title}</h1>
+        <h1 id="page-title">${p.title}</h1>
         <p class="lede">${p.excerpt}</p>
         <p>${p.description}</p>
         <ul class="tag-list">${p.services.map((s) => `<li>${s}</li>`).join('')}</ul>
         <div class="case-actions">
-          <a class="btn" href="${p.url}" target="_blank" rel="noopener noreferrer">Siteyi aç</a>
+          <a class="btn" href="${p.url}" target="_blank" rel="noopener noreferrer">Siteyi aç<span class="visually-hidden"> (yeni sekmede)</span></a>
           <a class="btn btn-ghost" href="/isler" data-link="/isler">Tüm işler</a>
         </div>
       </div>
@@ -328,7 +375,7 @@ function viewStudio() {
   return `
     <section class="page-hero">
       <p class="eyebrow">Operasyon</p>
-      <h1>Az kişi.<br>Sıkı hat.</h1>
+      <h1 id="page-title">Az kişi.<br>Sıkı hat.</h1>
       <p class="lede">Osware bir vitrin stüdyosu değil. ${studio.location} merkezli; web ve IT işini alan, kesen, üreten ve çalışan halde bırakan bir operasyon grubu. ${originLine()}</p>
     </section>
     <section class="process">
@@ -363,7 +410,7 @@ function viewTeam() {
   return `
     <section class="page-hero">
       <p class="eyebrow">Ekip</p>
-      <h1>İsimler masada.</h1>
+      <h1 id="page-title">İsimler masada.</h1>
       <p class="lede">${originLine()} Rotasyon yok. İş Bumin, Aleyna ve Seda’da durur — ${studio.location}.</p>
     </section>
     <div class="team-grid">
@@ -391,7 +438,7 @@ function viewContact() {
   return `
     <section class="page-hero">
       <p class="eyebrow">İletişim</p>
-      <h1>Şimdi bize ulaşın.</h1>
+      <h1 id="page-title">Şimdi bize ulaşın.</h1>
       <p class="lede">Form yok. Doğrudan yazın veya arayın. ${studio.location} — Bumin, Aleyna, Seda.</p>
     </section>
     <div class="contact-channels">
@@ -420,7 +467,7 @@ function viewNotFound() {
   return `
     <section class="page-hero">
       <p class="eyebrow">404</p>
-      <h1>Bu adres yok.</h1>
+      <h1 id="page-title">Bu adres yok.</h1>
       <p class="lede">Yanlış hat. İşlere dönün.</p>
       <a class="btn" href="/isler" data-link="/isler">İşler</a>
     </section>
@@ -450,20 +497,35 @@ function renderView() {
 function render() {
   const route = matchRoute(state.path)
   if (route.name === 'redirect') {
-    navigate(route.to, { replace: true })
+    navigate(route.to, { replace: true, focus: pendingFocus })
     return
   }
 
   const app = document.querySelector('#app')
+  const focus = pendingFocus
+  pendingFocus = null
   applyDocumentMeta(route)
   document.body.classList.toggle('lock', state.menuOpen)
 
   app.innerHTML = `
     ${renderHeader()}
-    <main id="view" class="view">${renderView()}</main>
+    <main id="view" class="view" tabindex="-1" aria-labelledby="page-title"${state.menuOpen ? ' inert' : ''}>${renderView()}</main>
     ${renderFooter()}
     ${whatsappFab()}
   `
+  moveFocus(focus)
+}
+
+function moveFocus(mode) {
+  if (mode === 'main') {
+    document.getElementById('view')?.focus({ preventScroll: true })
+  } else if (mode === 'menu-open') {
+    document.querySelector('#site-menu a')?.focus({ preventScroll: true })
+  } else if (mode === 'menu-close') {
+    document.querySelector('.menu-btn')?.focus({ preventScroll: true })
+  } else if (mode === 'marquee-toggle') {
+    document.querySelector('.marquee-toggle')?.focus()
+  }
 }
 
 function applyDocumentMeta(route) {
@@ -504,35 +566,60 @@ function onClick(event) {
 
   const action = event.target.closest('[data-action]')?.getAttribute('data-action')
   if (action === 'toggle-menu') {
-    state.menuOpen = !state.menuOpen
-    render()
+    setMenu(!state.menuOpen)
     return
   }
-  if (action === 'close-overlays') {
-    state.menuOpen = false
-    render()
+  if (action === 'close-overlays' && state.menuOpen) {
+    setMenu(false)
     return
+  }
+  if (action === 'toggle-marquee') {
+    state.marqueePaused = !state.marqueePaused
+    pendingFocus = 'marquee-toggle'
+    render()
   }
 }
 
+function menuTabStops() {
+  const stops = []
+  const button = document.querySelector('.menu-btn')
+  if (button && button.getClientRects().length > 0) stops.push(button)
+  const menu = document.getElementById('site-menu')
+  if (menu) stops.push(...menu.querySelectorAll('a[href], button:not([disabled])'))
+  return stops
+}
+
 function onKey(event) {
-  if (event.key === 'Escape' && state.menuOpen) {
-    state.menuOpen = false
-    render()
+  if (!state.menuOpen) return
+  if (event.key === 'Escape') {
+    event.preventDefault()
+    setMenu(false)
+    return
   }
-  if (event.key === 'Enter') {
-    const link = event.target.closest('[data-link]')
-    if (link) {
+  if (event.key !== 'Tab') return
+  const stops = menuTabStops()
+  if (stops.length === 0) return
+  const index = stops.indexOf(document.activeElement)
+  if (event.shiftKey) {
+    if (index <= 0) {
       event.preventDefault()
-      navigate(link.getAttribute('data-link'))
+      stops[stops.length - 1].focus({ preventScroll: true })
     }
+  } else if (index === -1 || index === stops.length - 1) {
+    event.preventDefault()
+    stops[0].focus({ preventScroll: true })
   }
 }
 
 window.addEventListener('popstate', () => {
   state.path = readPath()
   state.menuOpen = false
+  pendingFocus = 'main'
   render()
+})
+
+window.matchMedia('(min-width: 981px)').addEventListener('change', (event) => {
+  if (event.matches && state.menuOpen) setMenu(false, null)
 })
 
 document.addEventListener('click', onClick)
