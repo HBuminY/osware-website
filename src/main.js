@@ -10,8 +10,22 @@ import {
   values,
 } from './content.js'
 
+// GitHub Pages redirects a directory (`/isler` → `/isler/`) and serves
+// route copies as `/operasyon/`. Match those the same as the canonical path.
+function normalizePath(path) {
+  if (!path) return '/'
+  let value = path.startsWith('/') ? path : `/${path}`
+  value = value.replace(/\/index\.html$/i, '')
+  if (value.length > 1) value = value.replace(/\/+$/, '')
+  return value || '/'
+}
+
+function readPath() {
+  return normalizePath(window.location.pathname)
+}
+
 const state = {
-  path: window.location.pathname,
+  path: readPath(),
   menuOpen: false,
 }
 
@@ -20,20 +34,22 @@ function projectBySlug(slug) {
 }
 
 function navigate(path, { replace = false } = {}) {
-  if (path === state.path && !replace) {
+  const next = normalizePath(path)
+  if (next === state.path && !replace) {
     state.menuOpen = false
     render()
     return
   }
-  if (replace) history.replaceState({}, '', path)
-  else history.pushState({}, '', path)
-  state.path = path
+  if (replace) history.replaceState({}, '', next)
+  else history.pushState({}, '', next)
+  state.path = next
   state.menuOpen = false
   window.scrollTo({ top: 0, behavior: 'instant' })
   render()
 }
 
 function matchRoute(path) {
+  path = normalizePath(path)
   const aliases = {
     '/work': '/isler',
     '/studio': '/operasyon',
@@ -495,7 +511,7 @@ function onKey(event) {
 }
 
 window.addEventListener('popstate', () => {
-  state.path = window.location.pathname
+  state.path = readPath()
   state.menuOpen = false
   render()
 })
