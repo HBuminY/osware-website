@@ -9,6 +9,7 @@ import {
   team,
   values,
 } from './content.js'
+import { metaFor } from './seo.js'
 
 // GitHub Pages redirects a directory (`/isler` → `/isler/`) and serves
 // route copies as `/operasyon/`. Match those the same as the canonical path.
@@ -454,16 +455,7 @@ function render() {
   }
 
   const app = document.querySelector('#app')
-  const titles = {
-    home: 'Osware — web ve IT',
-    work: 'İşler — Osware',
-    project: `${projectBySlug(route.slug)?.title ?? 'İş'} — Osware`,
-    studio: 'Operasyon — Osware',
-    team: 'Ekip — Osware',
-    contact: 'İletişim — Osware',
-    notfound: 'Bulunamadı — Osware',
-  }
-  document.title = titles[route.name] || titles.notfound
+  applyDocumentMeta(route)
   document.body.classList.toggle('lock', state.menuOpen)
 
   app.innerHTML = `
@@ -472,6 +464,33 @@ function render() {
     ${renderFooter()}
     ${whatsappFab()}
   `
+}
+
+function applyDocumentMeta(route) {
+  const meta = metaFor(route, state.path)
+  document.title = meta.title
+  setMeta('meta[name="description"]', meta.description)
+  setMeta('meta[property="og:title"]', meta.title)
+  setMeta('meta[property="og:description"]', meta.socialDescription)
+  setMeta('meta[property="og:url"]', meta.url)
+  setMeta('meta[property="og:image"]', meta.image)
+  setMeta('meta[property="og:image:alt"]', meta.imageAlt)
+  setMeta('meta[property="og:image:width"]', String(meta.imageWidth))
+  setMeta('meta[property="og:image:height"]', String(meta.imageHeight))
+  setMeta('meta[name="twitter:card"]', meta.card)
+  setMeta('meta[name="twitter:title"]', meta.title)
+  setMeta('meta[name="twitter:description"]', meta.socialDescription)
+  setMeta('meta[name="twitter:image"]', meta.image)
+  setMeta('meta[name="twitter:image:alt"]', meta.imageAlt)
+  const canonical = document.head.querySelector('link[rel="canonical"]')
+  if (!canonical) throw new Error('Missing canonical link')
+  canonical.setAttribute('href', meta.url)
+}
+
+function setMeta(selector, value) {
+  const el = document.head.querySelector(selector)
+  if (!el) throw new Error(`Missing ${selector}`)
+  el.setAttribute('content', value)
 }
 
 function onClick(event) {
