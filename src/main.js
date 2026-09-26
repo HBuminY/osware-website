@@ -1,6 +1,7 @@
 import './style.css'
 import {
   capabilities,
+  inquiry,
   nav,
   projects,
   services,
@@ -8,8 +9,9 @@ import {
   studio,
   team,
   values,
+  workLines,
 } from './content.js'
-import { metaFor } from './seo.js'
+import { jsonLdText, metaFor } from './seo.js'
 
 // GitHub Pages redirects a directory (`/isler` → `/isler/`) and serves
 // route copies as `/operasyon/`. Match those the same as the canonical path.
@@ -78,15 +80,29 @@ function logoMark(extraClass = '') {
 
 function originLine() {
   const links = studio.previous
-    .map((item) => `<a href="${item.href}" target="_blank" rel="noreferrer">${item.name}</a>`)
+    .map(
+      (item) =>
+        `<a href="${item.href}" target="_blank" rel="noopener noreferrer">${item.name}</a>`,
+    )
     .join(' ve ')
   return `Üçümüz ${links} çıkışlıyız.`
 }
 
+function mailHref() {
+  const subject = encodeURIComponent('Osware — web / IT işi')
+  return `mailto:${studio.email}?subject=${subject}`
+}
+
+function whatsappInquiryHref() {
+  const text = encodeURIComponent('Merhaba Osware, bir web / IT işi konuşmak istiyorum.')
+  return `${studio.whatsappHref}?text=${text}`
+}
+
 function contactDetails() {
   return `<p class="contact-details">
-    <a href="mailto:${studio.email}">${studio.email}</a>
+    <a href="${mailHref()}">${studio.email}</a>
     <a href="${studio.phoneHref}">${studio.phone}</a>
+    <a href="${whatsappInquiryHref()}" target="_blank" rel="noopener noreferrer">WhatsApp</a>
     <span>${studio.location}</span>
   </p>`
 }
@@ -145,8 +161,8 @@ function renderFooter() {
       <div class="footer-cta">
         <p class="eyebrow">Kapasite</p>
         <h2>İş netse başlarız.</h2>
-        <p>Kapsamı birlikte keseriz. Uymuyorsa onu da söyleriz.</p>
-        <a class="btn btn-invert" href="/iletisim" data-link="/iletisim">İletişime geç</a>
+        <p>Web, IT veya kimlik. Kapsamı birlikte keseriz. Uymuyorsa onu da söyleriz.</p>
+        <a class="btn btn-invert" href="/iletisim" data-link="/iletisim">Proje başlat</a>
       </div>
       <div class="footer-grid">
         <div>
@@ -163,7 +179,7 @@ function renderFooter() {
         </div>
         <div>
           <p class="eyebrow">Kuruluş ${studio.founded}</p>
-          <p class="muted">Web geliştirme ve IT. ${studio.location}. Üç kişi, tek teslim.</p>
+          <p class="muted">Osware — ${studio.location}’de web geliştirme ve IT. Üç kişi, tek teslim.</p>
         </div>
       </div>
     </footer>
@@ -181,6 +197,7 @@ function workCard(p) {
         <div>
           <a href="/isler/${p.slug}" data-link="/isler/${p.slug}"><h3>${p.title}</h3></a>
           <p class="muted">${p.context}</p>
+          <p class="card-excerpt">${p.excerpt}</p>
         </div>
         <a class="text-btn" href="/isler/${p.slug}" data-link="/isler/${p.slug}">İncele</a>
       </div>
@@ -188,13 +205,24 @@ function workCard(p) {
   `
 }
 
+function serviceCard(s, { detail = false } = {}) {
+  return `
+    <article class="service-card">
+      <span class="code">${s.code}</span>
+      <h3>${s.title}</h3>
+      <p>${s.lead}</p>
+      ${detail ? `<p>${s.detail}</p>` : ''}
+      <p class="muted">Ekip · ${s.owner}</p>
+    </article>`
+}
+
 function viewHome() {
   return `
     <section class="hero">
       <div class="hero-copy">
-        <p class="eyebrow">Operasyon grubu · Web / IT</p>
-        <h1>İşleyen sistem<br>üretiriz.</h1>
-        <p class="lede">Osware; Bumin, Aleyna ve Seda. ${studio.location} merkezli, web ve IT işini uçtan uca kapatan üç kişilik üretim hattı. ${originLine()}</p>
+        <p class="eyebrow">Operasyon grubu · kuruluş ${studio.founded}</p>
+        <h1>Osware.<br>${studio.location}’de<br>web ve IT.</h1>
+        <p class="lede">Web ve IT işini bitiririz. Osware; Bumin, Aleyna ve Seda — ${studio.location} merkezli üç kişilik üretim hattı. Kurumsal site, ürün arayüzü, kimlik ve altyapı aynı hatta yürür. ${originLine()}. Kendi ürünümüz <a href="/isler/kiosos" data-link="/isler/kiosos">Kiosos</a> da yayında.</p>
         <div class="hero-actions">
           <a class="btn" href="/isler" data-link="/isler">İşlere bak</a>
           <a class="btn btn-ghost" href="/iletisim" data-link="/iletisim">Proje başlat</a>
@@ -202,7 +230,7 @@ function viewHome() {
         <dl class="hero-meta">
           <div><dt>Ekip</dt><dd>3 kişi</dd></div>
           <div><dt>Alan</dt><dd>Web + IT</dd></div>
-          <div><dt>Üs</dt><dd>${studio.location}</dd></div>
+          <div><dt>Konum</dt><dd>${studio.location}</dd></div>
         </dl>
       </div>
       <div class="hero-panel">
@@ -223,29 +251,20 @@ function viewHome() {
       <div class="section-head">
         <div>
           <p class="eyebrow">Hizmet</p>
-          <h2>Ne kapatırız</h2>
+          <h2>Web, IT, arayüz</h2>
         </div>
       </div>
       <div class="service-grid">
-        ${services
-          .map(
-            (s) => `
-          <article class="service-card">
-            <span class="code">${s.code}</span>
-            <h3>${s.title}</h3>
-            <p>${s.lead}</p>
-            <p class="muted">${s.owner}</p>
-          </article>`,
-          )
-          .join('')}
+        ${services.map((s) => serviceCard(s)).join('')}
       </div>
     </section>
 
     <section class="section section-tight">
       <div class="section-head">
         <div>
-          <p class="eyebrow">Ürettiğimiz iş</p>
-          <h2>Canlı ürünler</h2>
+          <p class="eyebrow">Kanıt</p>
+          <h2>Üç canlı ürün</h2>
+          <p class="section-note">İkisi Optiviser dönemi, biri Osware üretimi. Hepsi yayında — sahte katalog yok.</p>
         </div>
         <a class="text-btn" href="/isler" data-link="/isler">Tüm işler</a>
       </div>
@@ -277,15 +296,32 @@ function viewHome() {
 }
 
 function viewWork() {
+  const groups = workLines
+    .map((line) => {
+      const items = projects.filter((p) => p.line === line.id)
+      return `
+        <section class="work-group">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">${line.eyebrow}</p>
+              <h2>${line.title}</h2>
+              <p class="lede">${line.text}</p>
+            </div>
+          </div>
+          <div class="work-grid ${items.length === 1 ? 'work-grid-1' : items.length === 2 ? 'work-grid-2' : ''}">
+            ${items.map((p) => workCard(p)).join('')}
+          </div>
+        </section>`
+    })
+    .join('')
+
   return `
     <section class="page-hero">
       <p class="eyebrow">Portföy</p>
-      <h1>İşler</h1>
-      <p class="lede">Sahte katalog yok. Optiviser döneminde ürettiğimiz iki ürün ve Osware’in Kiosos’u — üçü de yayında.</p>
+      <h1>Canlı işler.</h1>
+      <p class="lede">Sahte katalog yok. Optiviser döneminde ürettiğimiz iki ürün ve Osware’in Kiosos’u — üçü de yayında, üçü de açılıp bakılır. Müşteri logosu dizmeyiz.</p>
     </section>
-    <div class="work-grid">
-      ${projects.map((p) => workCard(p)).join('')}
-    </div>
+    ${groups}
   `
 }
 
@@ -302,11 +338,22 @@ function viewProject(slug) {
         <p class="eyebrow">${p.context}</p>
         <h1>${p.title}</h1>
         <p class="lede">${p.excerpt}</p>
+        <dl class="case-meta">
+          <div><dt>Durum</dt><dd>${p.tag}</dd></div>
+          <div><dt>Kaynak</dt><dd>${p.context}</dd></div>
+          <div><dt>Kapsam</dt><dd>${p.services.join(' · ')}</dd></div>
+        </dl>
         <p>${p.description}</p>
-        <ul class="tag-list">${p.services.map((s) => `<li>${s}</li>`).join('')}</ul>
+        <ul class="fact-list">
+          ${p.points.map((point) => `<li>${point}</li>`).join('')}
+        </ul>
+        <aside class="callout">
+          <p class="eyebrow">Bu işin bağı</p>
+          <p>${p.scope}</p>
+        </aside>
         <div class="case-actions">
           <a class="btn" href="${p.url}" target="_blank" rel="noopener noreferrer">Siteyi aç</a>
-          <a class="btn btn-ghost" href="/isler" data-link="/isler">Tüm işler</a>
+          <a class="btn btn-ghost" href="/iletisim" data-link="/iletisim">Proje başlat</a>
         </div>
       </div>
     </article>
@@ -314,7 +361,7 @@ function viewProject(slug) {
       <div class="section-head">
         <div>
           <p class="eyebrow">Devamı</p>
-          <h2>Aynı hat</h2>
+          <h2>Diğer canlı işler</h2>
         </div>
       </div>
       <div class="work-grid work-grid-2">
@@ -327,34 +374,48 @@ function viewProject(slug) {
 function viewStudio() {
   return `
     <section class="page-hero">
-      <p class="eyebrow">Operasyon</p>
+      <p class="eyebrow">Operasyon · ${studio.location}</p>
       <h1>Az kişi.<br>Sıkı hat.</h1>
-      <p class="lede">Osware bir vitrin stüdyosu değil. ${studio.location} merkezli; web ve IT işini alan, kesen, üreten ve çalışan halde bırakan bir operasyon grubu. ${originLine()}</p>
-    </section>
-    <section class="process">
-      ${steps
-        .map(
-          (s, i) => `
-        <article class="process-step">
-          <span class="code">${String(i + 1).padStart(2, '0')}</span>
-          <h2>${s.title}</h2>
-          <p>${s.text}</p>
-        </article>`,
-        )
-        .join('')}
+      <p class="lede">Osware bir vitrin stüdyosu değil. ${studio.founded}’da ${studio.location}’de kuruldu. Web ve IT işini alan, kesen, üreten ve çalışan halde bırakan üç kişilik operasyon grubu. ${originLine()}.</p>
     </section>
     <section class="section">
-      <div class="value-grid">
-        ${values
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Ne alırız</p>
+          <h2>Web, IT, arayüz</h2>
+          <p class="section-note">Üç hat. Hepsi aynı teslimde birleşebilir; tek başına da yürür.</p>
+        </div>
+      </div>
+      <div class="service-grid">
+        ${services.map((s) => serviceCard(s, { detail: true })).join('')}
+      </div>
+    </section>
+    <section class="section section-tight">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Hat</p>
+          <h2>Nasıl yürür</h2>
+        </div>
+      </div>
+      <div class="process">
+        ${steps
           .map(
-            (v) => `
-          <article>
-            <h3>${v.title}</h3>
-            <p>${v.text}</p>
+            (s, i) => `
+          <article class="process-step">
+            <span class="code">${String(i + 1).padStart(2, '0')}</span>
+            <h3>${s.title}</h3>
+            <p>${s.text}</p>
           </article>`,
           )
           .join('')}
       </div>
+    </section>
+    <section class="section section-tight">
+      <aside class="callout">
+        <p class="eyebrow">Sınır</p>
+        <p>Portföyde logo duvarı yok. Gösterdiğimiz iş ya Optiviser döneminde ürettiğimiz üründür ya Osware’in Kiosos’udur. Üçü de canlıdadır. Uymayan işi baştan söyler, almayız.</p>
+        <a class="btn" href="/iletisim" data-link="/iletisim">Proje başlat</a>
+      </aside>
     </section>
   `
 }
@@ -364,7 +425,7 @@ function viewTeam() {
     <section class="page-hero">
       <p class="eyebrow">Ekip</p>
       <h1>İsimler masada.</h1>
-      <p class="lede">${originLine()} Rotasyon yok. İş Bumin, Aleyna ve Seda’da durur — ${studio.location}.</p>
+      <p class="lede">Bumin yazılım ve IT, Aleyna grafik tasarım, Seda frontend. Rotasyon yok — iş bu üç isimde durur, ${studio.location}’de. ${originLine()}.</p>
     </section>
     <div class="team-grid">
       ${team
@@ -384,18 +445,24 @@ function viewTeam() {
         )
         .join('')}
     </div>
+    <section class="section section-tight">
+      <aside class="callout">
+        <p class="eyebrow">Tek masa</p>
+        <p>Hesap yöneticisi yok. Keşif, üretim ve teslim bu üç isimde kalır. Yazılım ve IT Bumin’de, görsel sistem Aleyna’da, arayüz üretimi Seda’da birleşir. ${studio.location}’de, aynı hatta.</p>
+      </aside>
+    </section>
   `
 }
 
 function viewContact() {
   return `
     <section class="page-hero">
-      <p class="eyebrow">İletişim</p>
-      <h1>Şimdi bize ulaşın.</h1>
-      <p class="lede">Form yok. Doğrudan yazın veya arayın. ${studio.location} — Bumin, Aleyna, Seda.</p>
+      <p class="eyebrow">İletişim · ${studio.location}</p>
+      <h1>İşi doğrudan konuşun.</h1>
+      <p class="lede">Web veya IT işi için yazın. ${studio.location} — e-posta, telefon ve WhatsApp. Form yok; mesaj Bumin, Aleyna ve Seda’ya düşer. Uygunsa keşif, değilse net bir hayır.</p>
     </section>
     <div class="contact-channels">
-      <a class="channel" href="mailto:${studio.email}">
+      <a class="channel" href="${mailHref()}">
         <span class="eyebrow">E-posta</span>
         <strong>${studio.email}</strong>
         <span class="text-btn">Yaz</span>
@@ -405,14 +472,33 @@ function viewContact() {
         <strong>${studio.phone}</strong>
         <span class="text-btn">Ara</span>
       </a>
+      <a class="channel" href="${whatsappInquiryHref()}" target="_blank" rel="noopener noreferrer">
+        <span class="eyebrow">WhatsApp</span>
+        <strong>${studio.phone}</strong>
+        <span class="text-btn">Yaz</span>
+      </a>
       <div class="channel">
-        <span class="eyebrow">Üs</span>
+        <span class="eyebrow">Nereden</span>
         <strong>${studio.location}</strong>
+        <span class="muted">Kuruluş ${studio.founded}</span>
       </div>
     </div>
-    <ul class="aside-list contact-team">
-      ${team.map((m) => `<li><strong>${m.name}</strong> · ${m.role}</li>`).join('')}
-    </ul>
+    <div class="inquiry">
+      <div>
+        <h2>İlk mesajda bunlar yeter.</h2>
+        <ul class="fact-list">
+          ${inquiry.map((item) => `<li>${item}</li>`).join('')}
+        </ul>
+      </div>
+      <aside class="inquiry-card">
+        <p class="eyebrow">Kim okur</p>
+        <ul class="aside-list">
+          ${team.map((m) => `<li><strong>${m.name}</strong> · ${m.role}</li>`).join('')}
+        </ul>
+        <p>Aracı yok. İlk yazıda kapsam yeter.</p>
+        <a class="btn btn-invert" href="${mailHref()}">E-posta yaz</a>
+      </aside>
+    </div>
   `
 }
 
@@ -421,7 +507,7 @@ function viewNotFound() {
     <section class="page-hero">
       <p class="eyebrow">404</p>
       <h1>Bu adres yok.</h1>
-      <p class="lede">Yanlış hat. İşlere dönün.</p>
+      <p class="lede">Bu sayfa Osware’de yok. İşlere dönün.</p>
       <a class="btn" href="/isler" data-link="/isler">İşler</a>
     </section>
   `
@@ -485,6 +571,9 @@ function applyDocumentMeta(route) {
   const canonical = document.head.querySelector('link[rel="canonical"]')
   if (!canonical) throw new Error('Missing canonical link')
   canonical.setAttribute('href', meta.url)
+  const ld = document.head.querySelector('script[type="application/ld+json"]')
+  if (!ld) throw new Error('Missing json-ld')
+  ld.textContent = jsonLdText(meta)
 }
 
 function setMeta(selector, value) {
