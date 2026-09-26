@@ -1,7 +1,6 @@
 // Route titles and descriptions for the public site. Wording matches the
-// existing page ledes (and the homepage meta already in index.html).
-// GitHub Pages serves each route as a directory, so the canonical URL has a
-// trailing slash — `/isler` 301s to `/isler/`.
+// page ledes. GitHub Pages serves each route as a directory, so the canonical
+// URL has a trailing slash — `/isler` 301s to `/isler/`.
 import { projects, studio } from './content.js'
 
 export const siteOrigin = 'https://osware.org'
@@ -27,11 +26,6 @@ export function canonicalUrl(path) {
   return `${siteOrigin}${withSlash.replace(/\/+$/, '')}/`
 }
 
-function originText() {
-  const names = studio.previous.map((item) => item.name).join(' ve ')
-  return `Üçümüz ${names} çıkışlıyız.`
-}
-
 function page(entry) {
   return {
     ...brandImage,
@@ -45,36 +39,34 @@ const pages = [
   page({
     path: '/',
     name: 'home',
-    title: 'Osware — web ve IT',
-    description:
-      'Osware — Nevşehir merkezli web geliştirme ve IT operasyonu. Bumin, Aleyna ve Seda. Optiviser çıkışlı üç kişilik üretim hattı.',
-    socialDescription:
-      'Nevşehir. Web, arayüz, altyapı. Optiviser ve Trip Optiviser çıkışlı ekip. Tasarlanır, yazılır, teslim edilir.',
+    title: `Osware — ${studio.location}’de web ve IT`,
+    description: `Osware, ${studio.location} merkezli web ve IT. Bumin, Aleyna, Seda — üç kişi, tek teslim. Optiviser ve Optiviser Trip çıkışlı. Canlı ürün: Kiosos.`,
+    socialDescription: `${studio.location}’de web ve IT. Bumin, Aleyna, Seda. Optiviser çıkışlı üç kişi. Canlı iş: Optiviser, Optiviser Trip, Kiosos.`,
   }),
   page({
     path: '/isler',
     name: 'work',
     title: 'İşler — Osware',
     description:
-      'Sahte katalog yok. Optiviser döneminde ürettiğimiz iki ürün ve Osware’in Kiosos’u — üçü de yayında.',
+      'Osware işleri: Optiviser ve Optiviser Trip’te ürettiğimiz canlı ürünler ve kendi kiosk yazılımımız Kiosos. Sahte katalog yok; üçü de yayında.',
   }),
   page({
     path: '/operasyon',
     name: 'studio',
-    title: 'Operasyon — Osware',
-    description: `Osware bir vitrin stüdyosu değil. ${studio.location} merkezli; web ve IT işini alan, kesen, üreten ve çalışan halde bırakan bir operasyon grubu. ${originText()}`,
+    title: `Operasyon — Osware ${studio.location}`,
+    description: `Osware operasyonu ${studio.location}’de. ${studio.founded}’da kurulan ekip; web, arayüz ve IT işini keşiften teslime aynı üç kişi kapatır. Optiviser çıkışlıyız.`,
   }),
   page({
     path: '/ekip',
     name: 'team',
-    title: 'Ekip — Osware',
-    description: `${originText()} Rotasyon yok. İş Bumin, Aleyna ve Seda’da durur — ${studio.location}.`,
+    title: `Ekip — Osware ${studio.location}`,
+    description: `Osware ekibi ${studio.location}’de: Bumin yazılım ve IT, Aleyna grafik tasarım, Seda frontend. Üç kişi, tek teslim. Optiviser ve Optiviser Trip çıkışlıyız.`,
   }),
   page({
     path: '/iletisim',
     name: 'contact',
-    title: 'İletişim — Osware',
-    description: `Form yok. Doğrudan yazın veya arayın. ${studio.location} — Bumin, Aleyna, Seda.`,
+    title: `İletişim — Osware ${studio.location}`,
+    description: `Osware ile web veya IT işini konuşun. ${studio.location} — ${studio.email}, telefon ve WhatsApp. Mesaj Bumin, Aleyna ve Seda’ya düşer.`,
   }),
 ]
 
@@ -84,7 +76,7 @@ function projectMeta(project) {
     name: 'project',
     slug: project.slug,
     title: `${project.title} — Osware`,
-    description: project.excerpt,
+    description: project.summary,
     image: `${siteOrigin}${project.image}`,
     imageAlt: project.alt,
     imageWidth: shotImage.imageWidth,
@@ -109,7 +101,7 @@ export function metaFor(route, pathname = '/') {
     path: pathname || '/',
     name: 'notfound',
     title: 'Bulunamadı — Osware',
-    description: 'Yanlış hat. İşlere dönün.',
+    description: 'Bu sayfa Osware’de yok. İşlere dönün.',
   })
 }
 
@@ -122,6 +114,40 @@ function escapeText(value) {
 
 function escapeAttr(value) {
   return escapeText(value).replaceAll('"', '&quot;')
+}
+
+export function jsonLdText(meta) {
+  const graph = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'ProfessionalService',
+        '@id': `${siteOrigin}/#studio`,
+        name: 'Osware',
+        url: `${siteOrigin}/`,
+        email: studio.email,
+        telephone: '+905510439979',
+        areaServed: {
+          '@type': 'City',
+          name: studio.location,
+        },
+        description: `${studio.location} merkezli web geliştirme ve IT operasyonu.`,
+        foundingDate: studio.founded,
+        logo: `${siteOrigin}/osware.png`,
+        knowsLanguage: 'tr',
+      },
+      {
+        '@type': 'WebPage',
+        '@id': meta.url,
+        url: meta.url,
+        name: meta.title,
+        description: meta.description,
+        isPartOf: { '@id': `${siteOrigin}/#studio` },
+        inLanguage: 'tr-TR',
+      },
+    ],
+  }
+  return JSON.stringify(graph).replaceAll('<', '\\u003c')
 }
 
 export function renderHeadTags(meta) {
@@ -142,6 +168,7 @@ export function renderHeadTags(meta) {
     `<meta name="twitter:description" content="${escapeAttr(social)}" />`,
     `<meta name="twitter:image" content="${escapeAttr(meta.image)}" />`,
     `<meta name="twitter:image:alt" content="${escapeAttr(meta.imageAlt)}" />`,
+    `<script type="application/ld+json">${jsonLdText(meta)}</script>`,
   ].join('\n    ')
 }
 
