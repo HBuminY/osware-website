@@ -69,7 +69,7 @@ export const workLines = [
     id: 'own',
     eyebrow: 'Kendi hattımız',
     title: 'Osware üretimi',
-    text: 'Kiosos, Osware’in ürettiği kiosk yazılımı. Kafe ve restoran için yerinde kurulum ve mobil yönetimle birlikte yayında.',
+    text: 'Kiosos, Osware’in kiosk yazılımı. NEV MOTO KLİNİK ve Arıncık, ürettiğimiz müşteri siteleri. Üçü de yayında.',
   },
 ]
 
@@ -145,6 +145,54 @@ export const projects = [
     image: '/isler/kiosos.png',
     alt: 'Kiosos ana sayfası ekran görüntüsü',
     url: 'https://kiosos.com',
+  },
+  {
+    slug: 'nevmoto',
+    line: 'own',
+    title: 'NEV MOTO KLİNİK',
+    category: 'Kurumsal web',
+    tag: 'Canlı',
+    context: 'Osware üretimi',
+    excerpt: 'Nevşehir motosiklet ve ATV servisi tanıtım sitesi. Randevu Instagram DM ile.',
+    summary:
+      'NEV MOTO KLİNİK, Nevşehir’de motosiklet ve ATV servisi için tanıtım sitesi. Osware üretimi; randevu @nevmoto_klinik50 hesabına Instagram mesajı ile açılır.',
+    description:
+      'Nevşehir’de motosiklet ve ATV servisi için tanıtım sitesi. Tamir, bakım ve yedek parça sayfada durur. Randevu form değil, Instagram DM (@nevmoto_klinik50) ile alınır. Osware’in ürettiği, yayında olan müşteri sitesi.',
+    scope:
+      'Osware üretimi, müşteri sitesi. Adres hbuminy.github.io/nevmoto. Eski alan adı nevmotoklinik.com bu teslimin parçası değil; sitede yalnızca eski kaynak olarak geçer.',
+    points: [
+      'Nevşehir’de motosiklet ve ATV servisi: bakım, tamir ve yedek parça.',
+      'Randevu Instagram DM ile alınır; hesap @nevmoto_klinik50.',
+      'hbuminy.github.io/nevmoto adresinde yayında.',
+    ],
+    services: ['Kurumsal web'],
+    image: '/isler/nevmoto.png',
+    alt: 'NEV MOTO KLİNİK ana sayfası ekran görüntüsü',
+    url: 'https://hbuminy.github.io/nevmoto/',
+  },
+  {
+    slug: 'arincicek',
+    line: 'own',
+    title: 'Arıncık',
+    category: 'Kurumsal web',
+    tag: 'Canlı',
+    context: 'Osware üretimi',
+    excerpt: 'Nevşehir dövme stüdyosu ve müzik için Türkçe tanıtım sitesi. Randevu Instagram DM ile.',
+    summary:
+      'Arıncık, Nevşehir’de Arin Dövme Stüdyosu için tanıtım sitesi. Dövme ve müzik aynı sayfada; randevu @arintattoo7 hesabına Instagram mesajı ile açılır. Osware üretimi.',
+    description:
+      'Nevşehir’de Arin Dövme Stüdyosu için Türkçe tanıtım sitesi. Dövme çalışmaları ve müzik bölümü aynı sayfada durur. Randevu form değil, Instagram DM (@arintattoo7) ile açılır. Müzik, YouTube kanalı @ArinOfficiall üzerinden durur. Tarayıcı başlığı Arin Dövme Stüdyosu. Osware’in ürettiği, yayında olan müşteri sitesi.',
+    scope:
+      'Osware üretimi, müşteri sitesi. Yayındaki marka Arin Dövme Stüdyosu. Adres oswaretr.github.io/arincicek.',
+    points: [
+      'Nevşehir’de dövme stüdyosu tanıtımı. Randevu Instagram DM ile; hesap @arintattoo7.',
+      'Müzik bölümü aynı sitede. YouTube kanalı @ArinOfficiall.',
+      'Türkçe arayüz. oswaretr.github.io/arincicek adresinde yayında.',
+    ],
+    services: ['Kurumsal web'],
+    image: '/isler/arincicek.png',
+    alt: 'Arıncık ana sayfası ekran görüntüsü',
+    url: 'https://oswaretr.github.io/arincicek/',
   },
 ]
 
