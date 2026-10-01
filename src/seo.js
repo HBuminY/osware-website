@@ -40,33 +40,27 @@ const pages = [
     path: '/',
     name: 'home',
     title: `Osware — ${studio.location}’de web ve IT`,
-    description: `Osware, ${studio.location} merkezli web ve IT. Bumin, Aleyna, Seda — üç kişi, tek teslim. Optiviser ve Optiviser Trip çıkışlı. Canlı: Kiosos, NEV MOTO KLİNİK ve Arıncık.`,
-    socialDescription: `${studio.location}’de web ve IT. Bumin, Aleyna, Seda. Optiviser çıkışlı üç kişi. Canlı iş: Optiviser, Optiviser Trip, Kiosos, NEV MOTO KLİNİK, Arıncık.`,
+    description: `Osware, ${studio.location} merkezli web ve IT stüdyosu. Kurumsal site, ürün arayüzü, kimlik ve altyapı. Canlı iş: Arin Çiçek, NEV MOTO KLİNİK ve Kiosos.`,
+    socialDescription: `${studio.location}’de web ve IT stüdyosu. Canlı iş: Arin Çiçek, NEV MOTO KLİNİK, Kiosos.`,
   }),
   page({
     path: '/isler',
     name: 'work',
     title: 'İşler — Osware',
     description:
-      'Osware işleri: Optiviser ve Optiviser Trip, kiosk yazılımı Kiosos, müşteri siteleri NEV MOTO KLİNİK ve Arıncık. Sahte katalog yok; hepsi yayında.',
+      'Osware işleri: müşteri siteleri Arin Çiçek ve NEV MOTO KLİNİK, kiosk yazılımı Kiosos. Sahte katalog yok; hepsi yayında.',
   }),
   page({
     path: '/operasyon',
     name: 'studio',
-    title: `Operasyon — Osware ${studio.location}`,
-    description: `Osware operasyonu ${studio.location}’de. ${studio.founded}’da kurulan ekip; web, arayüz ve IT işini keşiften teslime aynı üç kişi kapatır. Optiviser çıkışlıyız.`,
-  }),
-  page({
-    path: '/ekip',
-    name: 'team',
-    title: `Ekip — Osware ${studio.location}`,
-    description: `Osware ekibi ${studio.location}’de: Bumin yazılım ve IT, Aleyna grafik tasarım, Seda frontend. Üç kişi, tek teslim. Optiviser ve Optiviser Trip çıkışlıyız.`,
+    title: `Hizmetler — Osware ${studio.location}`,
+    description: `Osware, ${studio.location}’de web, arayüz ve IT stüdyosu. ${studio.founded}’da kuruldu. Keşiften teslime aynı hat; kapsam, üretim ve devir birlikte yürür.`,
   }),
   page({
     path: '/iletisim',
     name: 'contact',
     title: `İletişim — Osware ${studio.location}`,
-    description: `Osware ile web veya IT işini konuşun. ${studio.location} — ${studio.email}, telefon ve WhatsApp. Mesaj Bumin, Aleyna ve Seda’ya düşer.`,
+    description: `Osware ile web veya IT işini konuşun. ${studio.location} — ${studio.email}, telefon ve WhatsApp. Mesaj doğrudan stüdyoya düşer.`,
   }),
 ]
 
@@ -131,7 +125,7 @@ export function jsonLdText(meta) {
           '@type': 'City',
           name: studio.location,
         },
-        description: `${studio.location} merkezli web geliştirme ve IT operasyonu.`,
+        description: `${studio.location} merkezli web geliştirme ve IT stüdyosu.`,
         foundingDate: studio.founded,
         logo: `${siteOrigin}/osware.png`,
         knowsLanguage: 'tr',

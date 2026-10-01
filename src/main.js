@@ -7,7 +7,6 @@ import {
   services,
   steps,
   studio,
-  team,
   values,
   workLines,
 } from './content.js'
@@ -30,7 +29,6 @@ function readPath() {
 const state = {
   path: readPath(),
   menuOpen: false,
-  marqueePaused: false,
 }
 
 // Where to move focus after the next render. Null on the first paint so a
@@ -68,14 +66,14 @@ function matchRoute(path) {
   const aliases = {
     '/work': '/isler',
     '/studio': '/operasyon',
-    '/team': '/ekip',
+    '/ekip': '/operasyon',
+    '/team': '/operasyon',
     '/contact': '/iletisim',
   }
   if (aliases[path]) return { name: 'redirect', to: aliases[path] }
   if (path === '/' || path === '') return { name: 'home' }
   if (path === '/isler') return { name: 'work' }
   if (path === '/operasyon') return { name: 'studio' }
-  if (path === '/ekip') return { name: 'team' }
   if (path === '/iletisim') return { name: 'contact' }
   const work = path.match(/^\/isler\/([^/]+)$/)
   if (work) return { name: 'project', slug: work[1] }
@@ -105,16 +103,6 @@ function navAnchors() {
       return `<a href="${item.href}" data-link="${item.href}"${current}>${item.label}</a>`
     })
     .join('')
-}
-
-function originLine() {
-  const links = studio.previous
-    .map(
-      (item) =>
-        `<a href="${item.href}" target="_blank" rel="noopener noreferrer">${item.name}<span class="visually-hidden"> (yeni sekmede)</span></a>`,
-    )
-    .join(' ve ')
-  return `Üçümüz ${links} çıkışlıyız.`
 }
 
 function mailHref() {
@@ -183,18 +171,19 @@ function renderFooter() {
   return `
     <footer class="site-footer"${inert}>
       <div class="footer-cta">
-        <p class="eyebrow">Kapasite</p>
-        <h2>İş netse başlarız.</h2>
+        <p class="eyebrow">Sonraki iş</p>
+        <h2>Kapsam netse başlarız.</h2>
         <p>Web, IT veya kimlik. Kapsamı birlikte keseriz. Uymuyorsa onu da söyleriz.</p>
         <a class="btn btn-invert" href="/iletisim" data-link="/iletisim">Proje başlat</a>
       </div>
       <div class="footer-grid">
         <div>
           ${logoMark('logo-footer')}
+          <p class="muted">Osware — ${studio.location}’de web geliştirme ve IT stüdyosu. Kuruluş ${studio.founded}.</p>
           ${contactDetails()}
         </div>
-        <nav aria-label="Hat">
-          <p class="eyebrow" aria-hidden="true">Hat</p>
+        <nav aria-label="Sayfalar">
+          <p class="eyebrow" aria-hidden="true">Sayfalar</p>
           <ul class="footer-links">
             ${nav
               .map((item) => {
@@ -205,16 +194,17 @@ function renderFooter() {
               .join('')}
           </ul>
         </nav>
-        <nav aria-label="Ekip">
-          <p class="eyebrow" aria-hidden="true">Ekip</p>
+        <nav aria-label="İşler">
+          <p class="eyebrow" aria-hidden="true">İşler</p>
           <ul class="footer-links">
-            ${team.map((m) => `<li><a href="/ekip" data-link="/ekip">${m.name}</a></li>`).join('')}
+            ${projects
+              .map(
+                (p) =>
+                  `<li><a href="/isler/${p.slug}" data-link="/isler/${p.slug}">${p.title}</a></li>`,
+              )
+              .join('')}
           </ul>
         </nav>
-        <div>
-          <p class="eyebrow">Kuruluş ${studio.founded}</p>
-          <p class="muted">Osware — ${studio.location}’de web geliştirme ve IT. Üç kişi, tek teslim.</p>
-        </div>
       </div>
     </footer>
   `
@@ -247,7 +237,6 @@ function serviceCard(s, { detail = false } = {}) {
       <h3>${s.title}</h3>
       <p>${s.lead}</p>
       ${detail ? `<p>${s.detail}</p>` : ''}
-      <p class="muted">Ekip · ${s.owner}</p>
     </article>`
 }
 
@@ -255,40 +244,33 @@ function viewHome() {
   return `
     <section class="hero">
       <div class="hero-copy">
-        <p class="eyebrow">Operasyon grubu · kuruluş ${studio.founded}</p>
+        <p class="eyebrow">Web ve IT stüdyosu · ${studio.location}</p>
         <h1 id="page-title">Osware.<br>${studio.location}’de<br>web ve IT.</h1>
-        <p class="lede">Web ve IT işini bitiririz. Osware; Bumin, Aleyna ve Seda — ${studio.location} merkezli üç kişilik üretim hattı. Kurumsal site, ürün arayüzü, kimlik ve altyapı aynı hatta yürür. ${originLine()}. Kendi ürünümüz <a href="/isler/kiosos" data-link="/isler/kiosos">Kiosos</a> ile müşteri siteleri <a href="/isler/nevmoto" data-link="/isler/nevmoto">NEV MOTO KLİNİK</a> ve <a href="/isler/arincicek" data-link="/isler/arincicek">Arıncık</a> da yayında.</p>
+        <p class="lede">Web ve IT işini teslim ederiz. Kurumsal site, ürün arayüzü, kimlik ve altyapı aynı hatta yürür. Kapsam yazılır, sistem yayına çıkar, devir tamamlanır. Canlı iş: <a href="/isler/arincicek" data-link="/isler/arincicek">Arin Çiçek</a>, <a href="/isler/nevmoto" data-link="/isler/nevmoto">NEV MOTO KLİNİK</a> ve <a href="/isler/kiosos" data-link="/isler/kiosos">Kiosos</a>.</p>
         <div class="hero-actions">
           <a class="btn" href="/isler" data-link="/isler">İşlere bak</a>
           <a class="btn btn-ghost" href="/iletisim" data-link="/iletisim">Proje başlat</a>
         </div>
         <dl class="hero-meta">
-          <div><dt>Ekip</dt><dd>3 kişi</dd></div>
           <div><dt>Alan</dt><dd>Web + IT</dd></div>
           <div><dt>Konum</dt><dd>${studio.location}</dd></div>
+          <div><dt>Kuruluş</dt><dd>${studio.founded}</dd></div>
         </dl>
       </div>
-      <div class="hero-panel">
-        <img src="/osware.png" alt="" class="hero-logo" />
+      <aside class="hero-panel">
+        <p class="hero-panel-kicker">Kuruluş ${studio.founded}</p>
+        <p class="hero-panel-lead">Web, IT ve arayüz. Aynı stüdyo, aynı teslim.</p>
         <ul class="hero-stack">
           ${services.map((s) => `<li><span>${s.code}</span>${s.title}</li>`).join('')}
         </ul>
-      </div>
+      </aside>
     </section>
 
-    <div class="visually-hidden">
-      <h2>Yetenekler</h2>
+    <div class="band">
+      <h2 class="visually-hidden">Yetenekler</h2>
       <ul>
         ${capabilities.map((item) => `<li>${item}</li>`).join('')}
       </ul>
-    </div>
-    <div class="marquee${state.marqueePaused ? ' is-paused' : ''}">
-      <div class="marquee-track" aria-hidden="true">
-        ${Array(2).fill(`${capabilities.join(' · ')} · `).join('')}
-      </div>
-      <button type="button" class="marquee-toggle" data-action="toggle-marquee" aria-pressed="${state.marqueePaused}">
-        ${state.marqueePaused ? 'Oynat' : 'Durdur'}<span class="visually-hidden"> animasyonu</span>
-      </button>
     </div>
 
     <section class="section">
@@ -306,9 +288,9 @@ function viewHome() {
     <section class="section section-tight">
       <div class="section-head">
         <div>
-          <p class="eyebrow">Kanıt</p>
+          <p class="eyebrow">Seçilmiş iş</p>
           <h2>Canlı işler</h2>
-          <p class="section-note">İkisi Optiviser dönemi. Osware hattında Kiosos ve iki müşteri sitesi. Hepsi yayında — sahte katalog yok.</p>
+          <p class="section-note">Müşteri siteleri önde: Arin Çiçek ve NEV MOTO KLİNİK. Kendi ürünümüz Kiosos aynı listede. Hepsi yayında.</p>
         </div>
         <a class="text-btn" href="/isler" data-link="/isler">Tüm işler</a>
       </div>
@@ -319,10 +301,10 @@ function viewHome() {
 
     <section class="split">
       <div class="split-copy">
-        <p class="eyebrow">Neden üç kişi</p>
-        <h2>Karar ve üretim aynı masada.</h2>
-        <p>Ajans katmanı yok. Hesap yöneticisi yok. İş Bumin, Aleyna ve Seda’da durur — ${studio.location}’de, aynı masada. Yazılım, IT, arayüz ve kimlik tek teslimde birleşir.</p>
-        <a class="btn btn-ghost" href="/operasyon" data-link="/operasyon">Operasyonu gör</a>
+        <p class="eyebrow">Yaklaşım</p>
+        <h2>Karar ve üretim aynı hatta.</h2>
+        <p>Ara katman yok. Kapsam, tasarım, yazılım ve IT tek teslimde birleşir. İş ${studio.location}’den yürür; yayındaki sistem, erişim ve devir ile kapanır.</p>
+        <a class="btn btn-ghost" href="/operasyon" data-link="/operasyon">Hizmetleri gör</a>
       </div>
       <div class="split-facts">
         ${values
@@ -363,7 +345,7 @@ function viewWork() {
     <section class="page-hero">
       <p class="eyebrow">Portföy</p>
       <h1 id="page-title">Canlı işler.</h1>
-      <p class="lede">Sahte katalog yok. Optiviser döneminde iki ürün; Osware’de Kiosos ve iki müşteri sitesi. Hepsi yayında, hepsi açılıp bakılır. Müşteri logosu dizmeyiz.</p>
+      <p class="lede">Sahte katalog yok. Gösterdiğimiz her iş yayında ve açılıp bakılır. Müşteri siteleri önde; ürünümüz Kiosos aynı portföyde.</p>
     </section>
     ${groups}
   `
@@ -384,7 +366,7 @@ function viewProject(slug) {
         <p class="lede">${p.excerpt}</p>
         <dl class="case-meta">
           <div><dt>Durum</dt><dd>${p.tag}</dd></div>
-          <div><dt>Kaynak</dt><dd>${p.context}</dd></div>
+          <div><dt>Tür</dt><dd>${p.context}</dd></div>
           <div><dt>Kapsam</dt><dd>${p.services.join(' · ')}</dd></div>
         </dl>
         <p>${p.description}</p>
@@ -392,7 +374,7 @@ function viewProject(slug) {
           ${p.points.map((point) => `<li>${point}</li>`).join('')}
         </ul>
         <aside class="callout">
-          <p class="eyebrow">Bu işin bağı</p>
+          <p class="eyebrow">Teslim</p>
           <p>${p.scope}</p>
         </aside>
         <div class="case-actions">
@@ -418,16 +400,16 @@ function viewProject(slug) {
 function viewStudio() {
   return `
     <section class="page-hero">
-      <p class="eyebrow">Operasyon · ${studio.location}</p>
-      <h1 id="page-title">Az kişi.<br>Sıkı hat.</h1>
-      <p class="lede">Osware bir vitrin stüdyosu değil. ${studio.founded}’da ${studio.location}’de kuruldu. Web ve IT işini alan, kesen, üreten ve çalışan halde bırakan üç kişilik operasyon grubu. ${originLine()}.</p>
+      <p class="eyebrow">Stüdyo · ${studio.location}</p>
+      <h1 id="page-title">Net kapsam.<br>Çalışan teslim.</h1>
+      <p class="lede">Osware, ${studio.founded}’da ${studio.location}’de kurulmuş bir web ve IT stüdyosudur. İşi alır, kapsamını keser, üretir ve çalışan halde bırakır.</p>
     </section>
     <section class="section">
       <div class="section-head">
         <div>
           <p class="eyebrow">Ne alırız</p>
           <h2>Web, IT, arayüz</h2>
-          <p class="section-note">Üç hat. Hepsi aynı teslimde birleşebilir; tek başına da yürür.</p>
+          <p class="section-note">Web, IT ve arayüz. Birlikte ya da ayrı yürür; teslim tektir.</p>
         </div>
       </div>
       <div class="service-grid">
@@ -457,42 +439,8 @@ function viewStudio() {
     <section class="section section-tight">
       <aside class="callout">
         <p class="eyebrow">Sınır</p>
-        <p>Portföyde logo duvarı yok. Gösterdiğimiz iş ya Optiviser döneminde ürettiğimiz üründür ya Osware’in ürettiği Kiosos ile müşteri siteleridir. Hepsi canlıdadır. Uymayan işi baştan söyler, almayız.</p>
+        <p>Portföyde logo duvarı yok. Gösterdiğimiz iş, ürettiğimiz müşteri siteleri ile kendi ürünümüz Kiosos’tur. Hepsi canlıdadır. Uymayan işi baştan söyler, almayız.</p>
         <a class="btn" href="/iletisim" data-link="/iletisim">Proje başlat</a>
-      </aside>
-    </section>
-  `
-}
-
-function viewTeam() {
-  return `
-    <section class="page-hero">
-      <p class="eyebrow">Ekip</p>
-      <h1 id="page-title">İsimler masada.</h1>
-      <p class="lede">Bumin yazılım ve IT, Aleyna grafik tasarım, Seda frontend. Rotasyon yok — iş bu üç isimde durur, ${studio.location}’de. ${originLine()}.</p>
-    </section>
-    <div class="team-grid">
-      ${team
-        .map(
-          (m) => `
-        <article class="team-card">
-          <div class="portrait tone-${m.tone}">
-            <span aria-hidden="true">${m.name.slice(0, 1)}</span>
-            <div class="portrait-meta">
-              <p class="eyebrow">${m.role}</p>
-              <h2>${m.name}</h2>
-            </div>
-          </div>
-          <p>${m.bio}</p>
-          <ul class="tag-list">${m.focus.map((f) => `<li>${f}</li>`).join('')}</ul>
-        </article>`,
-        )
-        .join('')}
-    </div>
-    <section class="section section-tight">
-      <aside class="callout">
-        <p class="eyebrow">Tek masa</p>
-        <p>Hesap yöneticisi yok. Keşif, üretim ve teslim bu üç isimde kalır. Yazılım ve IT Bumin’de, görsel sistem Aleyna’da, arayüz üretimi Seda’da birleşir. ${studio.location}’de, aynı hatta.</p>
       </aside>
     </section>
   `
@@ -503,7 +451,7 @@ function viewContact() {
     <section class="page-hero">
       <p class="eyebrow">İletişim · ${studio.location}</p>
       <h1 id="page-title">İşi doğrudan konuşun.</h1>
-      <p class="lede">Web veya IT işi için yazın. ${studio.location} — e-posta, telefon ve WhatsApp. Form yok; mesaj Bumin, Aleyna ve Seda’ya düşer. Uygunsa keşif, değilse net bir hayır.</p>
+      <p class="lede">Web veya IT işi için yazın. ${studio.location} — e-posta, telefon ve WhatsApp. Form yok; mesaj doğrudan stüdyoya düşer. Uygunsa keşif, değilse net bir hayır.</p>
     </section>
     <div class="contact-channels">
       <a class="channel" href="${mailHref()}">
@@ -535,11 +483,11 @@ function viewContact() {
         </ul>
       </div>
       <aside class="inquiry-card">
-        <p class="eyebrow">Kim okur</p>
+        <p class="eyebrow">Stüdyo</p>
         <ul class="aside-list">
-          ${team.map((m) => `<li><strong>${m.name}</strong> · ${m.role}</li>`).join('')}
+          ${services.map((s) => `<li><strong>${s.title}</strong></li>`).join('')}
         </ul>
-        <p>Aracı yok. İlk yazıda kapsam yeter.</p>
+        <p>Aracı yok. İlk yazıda kapsam yeter. Uygun iş keşfe alınır.</p>
         <a class="btn btn-invert" href="${mailHref()}">E-posta yaz</a>
       </aside>
     </div>
@@ -568,8 +516,6 @@ function renderView() {
       return viewProject(route.slug)
     case 'studio':
       return viewStudio()
-    case 'team':
-      return viewTeam()
     case 'contact':
       return viewContact()
     default:
@@ -606,8 +552,6 @@ function moveFocus(mode) {
     document.querySelector('#site-menu a')?.focus({ preventScroll: true })
   } else if (mode === 'menu-close') {
     document.querySelector('.menu-btn')?.focus({ preventScroll: true })
-  } else if (mode === 'marquee-toggle') {
-    document.querySelector('.marquee-toggle')?.focus()
   }
 }
 
@@ -657,12 +601,6 @@ function onClick(event) {
   }
   if (action === 'close-overlays' && state.menuOpen) {
     setMenu(false)
-    return
-  }
-  if (action === 'toggle-marquee') {
-    state.marqueePaused = !state.marqueePaused
-    pendingFocus = 'marquee-toggle'
-    render()
   }
 }
 

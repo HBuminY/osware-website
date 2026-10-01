@@ -7,16 +7,11 @@ export const studio = {
   location: 'Nevşehir',
   founded: '2026',
   tagline: 'Web ve IT işini bitiririz.',
-  previous: [
-    { name: 'Optiviser', href: 'https://optiviser.com' },
-    { name: 'Optiviser Trip', href: 'https://trip.optiviser.com' },
-  ],
 }
 
 export const nav = [
   { href: '/isler', label: 'İşler' },
-  { href: '/operasyon', label: 'Operasyon' },
-  { href: '/ekip', label: 'Ekip' },
+  { href: '/operasyon', label: 'Hizmetler' },
   { href: '/iletisim', label: 'İletişim' },
 ]
 
@@ -27,7 +22,6 @@ export const services = [
     lead: 'Kurumsal site, yönetim paneli, ürün arayüzü. Tasarım ve kod aynı hatta yürür; teslim, yayında duran bir sistemdir.',
     detail:
       'Sade bir kurumsal sayfa da olur, ürünün kendi ekranı da. İkisi de aynı soruyla başlar: ne yayında kalacak, kim devralacak?',
-    owner: 'Seda + Bumin',
   },
   {
     code: '02',
@@ -35,7 +29,6 @@ export const services = [
     lead: 'Kurulum, güvenlik, entegrasyon, süreklilik. Ekranda görünmeyen katman da işin parçasıdır — erişim, yedek, devir dahil.',
     detail:
       'Site açıldıktan sonra kim sahip, nerede duruyor, bozulunca kim bakıyor. Bunu teslimde bırakırız; dokümantasyon da orada durur.',
-    owner: 'Bumin',
   },
   {
     code: '03',
@@ -43,7 +36,6 @@ export const services = [
     lead: 'Ürünün duruşu tesadüf değildir. Tipografi, düzen, görsel sistem — ekranda ve belgede aynı disiplin.',
     detail:
       'Logo tek başına kimlik değildir. Sayfa, panel ve işaret aynı dili konuşur. Rastgele kalan bir yüzey bırakmayız.',
-    owner: 'Aleyna',
   },
 ]
 
@@ -60,106 +52,58 @@ export const capabilities = [
 
 export const workLines = [
   {
-    id: 'alumni',
-    eyebrow: 'Önceki kadro',
-    title: 'Optiviser döneminde',
-    text: 'Bu işler Osware müşterisi değil. Üçümüz Optiviser kadrosundayken ürettik; ikisi de hâlâ yayında.',
+    id: 'client',
+    eyebrow: 'Müşteri',
+    title: 'Yayındaki siteler',
+    text: 'İşletmeler için üretilmiş tanıtım siteleri. İkisi de yayında, ikisi de açılıp bakılır.',
   },
   {
-    id: 'own',
-    eyebrow: 'Kendi hattımız',
-    title: 'Osware üretimi',
-    text: 'Kiosos, Osware’in kiosk yazılımı. NEV MOTO KLİNİK ve Arıncık, ürettiğimiz müşteri siteleri. Üçü de yayında.',
+    id: 'product',
+    eyebrow: 'Ürün',
+    title: 'Kiosk yazılımı',
+    text: 'Kiosos, kafe ve restoranlar için kiosk yazılımı, yerinde kurulum ve mobil yönetim. Osware üretimi.',
   },
 ]
 
 export const projects = [
   {
-    slug: 'optiviser',
-    line: 'alumni',
-    title: 'Optiviser',
-    category: 'Ürün',
+    slug: 'arincicek',
+    line: 'client',
+    title: 'Arin Çiçek',
+    category: 'Kurumsal web',
     tag: 'Canlı',
-    context: 'Optiviser bünyesinde',
-    excerpt: 'Bütçe ve ihtiyaca göre elektronik ürün öneren yapay zeka asistanı.',
+    context: 'Müşteri sitesi',
+    excerpt: 'Nevşehir’de dövme stüdyosu ve müzik için Türkçe tanıtım sitesi. Randevu Instagram DM ile.',
     summary:
-      'Optiviser, elektronik ürün öneren yapay zeka asistanı. Osware müşterisi değil — Optiviser kadrosundayken ürettiğimiz, hâlâ yayında olan ürün.',
+      'Arin Çiçek, Nevşehir’de dövme stüdyosu için tanıtım sitesi. Dövme ve müzik aynı sayfada; randevu @arintattoo7 hesabına Instagram mesajı ile açılır. Osware üretimi.',
     description:
-      'Optiviser, elektronik alışveriş için bir asistan. Bütçe ve ihtiyaca göre telefon, dizüstü ve benzeri ürün önerir; karşılaştırmayı kullanıcının yerine tarar. Bu iş Osware müşterisi değil — üçümüzün Optiviser kadrosundayken ürettiği, hâlâ yayında olan ürün.',
+      'Nevşehir’de Arin Çiçek için Türkçe tanıtım sitesi. Dövme çalışmaları ve müzik bölümü aynı sayfada durur. Randevu form değil, Instagram DM (@arintattoo7) ile açılır. Müzik, YouTube kanalı @ArinOfficiall üzerinden durur. Osware’in ürettiği, yayında olan müşteri sitesi.',
     scope:
-      'Osware müşterisi değil. Üçümüz bu ürünü Optiviser kadrosundayken ürettik. Müşteri listesi yok; ürün optiviser.com adresinde duruyor.',
+      'Müşteri sitesi. Yayındaki isim Arin Çiçek. Adres oswaretr.github.io/arincicek.',
     points: [
-      'Bütçe ve ihtiyaca göre elektronik ürün önerir: telefon, dizüstü ve benzeri cihazlar.',
-      'Tercihi okuyup karşılaştırmayı kısaltır; çıkan şey kişiselleştirilmiş bir öneridir.',
-      'optiviser.com adresinde yayında.',
+      'Nevşehir’de dövme stüdyosu tanıtımı. Randevu Instagram DM ile; hesap @arintattoo7.',
+      'Müzik bölümü aynı sitede. YouTube kanalı @ArinOfficiall.',
+      'Türkçe arayüz. oswaretr.github.io/arincicek adresinde yayında.',
     ],
-    services: ['Web', 'Ürün arayüzü', 'AI asistan'],
-    image: '/isler/optiviser.png',
-    alt: 'Optiviser ana sayfası ekran görüntüsü',
-    url: 'https://optiviser.com',
-  },
-  {
-    slug: 'optiviser-trip',
-    line: 'alumni',
-    title: 'Optiviser Trip',
-    category: 'Ürün',
-    tag: 'Canlı',
-    context: 'Optiviser bünyesinde',
-    excerpt: 'Kişisel rota ve günlük plan üreten seyahat asistanı.',
-    summary:
-      'Optiviser Trip, kişisel rota ve günlük plan üreten seyahat asistanı. Osware müşterisi değil — Optiviser döneminde ürettiğimiz, hâlâ yayında olan ürün.',
-    description:
-      'Optiviser Trip, seyahat planını kişisel rota ve günlük itinerary’ye çeviren bir asistan. Tercihe göre plan çıkarır; plan sonradan düzenlenir. Web’de yayında. Optiviser’in iOS ve Android uygulamaları da açık. Bu da Osware müşterisi değil — Optiviser döneminde ürettiğimiz ikinci ürün.',
-    scope:
-      'Osware müşterisi değil. Optiviser döneminde ürettiğimiz ikinci canlı ürün. Site trip.optiviser.com; mobil uygulamalar da Optiviser adına açık.',
-    points: [
-      'Gidilecek yer ve tercihe göre kişisel rota ile günlük plan üretir.',
-      'Plan sonradan düzenlenebilir; ayrıntı tek yerde durur.',
-      'trip.optiviser.com adresinde yayında. iOS ve Android uygulamaları da herkese açık.',
-    ],
-    services: ['Web', 'Ürün arayüzü', 'AI asistan'],
-    image: '/isler/optiviser-trip.png',
-    alt: 'Optiviser Trip ana sayfası ekran görüntüsü',
-    url: 'https://trip.optiviser.com',
-  },
-  {
-    slug: 'kiosos',
-    line: 'own',
-    title: 'Kiosos',
-    category: 'Ürün',
-    tag: 'Canlı',
-    context: 'Osware üretimi',
-    excerpt: 'Kafe ve restoranlar için kiosk yazılımı, yerinde kurulum ve mobil yönetim.',
-    summary:
-      'Kiosos, kafe ve restoranlar için kiosk yazılımı, yerinde kurulum ve mobil yönetim. Osware üretimi; kiosos.com adresinde yayında.',
-    description:
-      'Kiosos; salondaki kiosk, yazılım katmanı ve işletmecinin cebindeki uygulama. Menü, kampanya ve müsaitlik tek yerden yönetilir. Yazılım ile donanım birlikte gelir, kurulum yerinde yapılır. Osware’in ürettiği, hâlâ yayında olan ürün.',
-    scope:
-      'Osware’in kendi ürünü. Kafe ve restoran hattı: yazılım, yerinde kurulum, mobil yönetim. Kurulum sayısı veya müşteri adı yayınlamıyoruz; ürün kiosos.com adresinde.',
-    points: [
-      'Kafe ve restoran salonuna kiosk kurulur; sipariş ekranı mekânda durur.',
-      'Menü, kampanya ve müsaitlik, işletmecinin mobil uygulamasından ünitelere gider.',
-      'Yazılım, donanım ve yerinde kurulum aynı iş. kiosos.com adresinde yayında.',
-    ],
-    services: ['Web', 'Kiosk yazılımı', 'Mobil'],
-    image: '/isler/kiosos.png',
-    alt: 'Kiosos ana sayfası ekran görüntüsü',
-    url: 'https://kiosos.com',
+    services: ['Kurumsal web'],
+    image: '/isler/arincicek.png',
+    alt: 'Arin Çiçek ana sayfası ekran görüntüsü',
+    url: 'https://oswaretr.github.io/arincicek/',
   },
   {
     slug: 'nevmoto',
-    line: 'own',
+    line: 'client',
     title: 'NEV MOTO KLİNİK',
     category: 'Kurumsal web',
     tag: 'Canlı',
-    context: 'Osware üretimi',
+    context: 'Müşteri sitesi',
     excerpt: 'Nevşehir motosiklet ve ATV servisi tanıtım sitesi. Randevu Instagram DM ile.',
     summary:
       'NEV MOTO KLİNİK, Nevşehir’de motosiklet ve ATV servisi için tanıtım sitesi. Osware üretimi; randevu @nevmoto_klinik50 hesabına Instagram mesajı ile açılır.',
     description:
       'Nevşehir’de motosiklet ve ATV servisi için tanıtım sitesi. Tamir, bakım ve yedek parça sayfada durur. Randevu form değil, Instagram DM (@nevmoto_klinik50) ile alınır. Osware’in ürettiği, yayında olan müşteri sitesi.',
     scope:
-      'Osware üretimi, müşteri sitesi. Adres hbuminy.github.io/nevmoto. Eski alan adı nevmotoklinik.com bu teslimin parçası değil; sitede yalnızca eski kaynak olarak geçer.',
+      'Müşteri sitesi. Adres hbuminy.github.io/nevmoto. Eski alan adı nevmotoklinik.com bu teslimin parçası değil; sitede yalnızca eski kaynak olarak geçer.',
     points: [
       'Nevşehir’de motosiklet ve ATV servisi: bakım, tamir ve yedek parça.',
       'Randevu Instagram DM ile alınır; hesap @nevmoto_klinik50.',
@@ -171,55 +115,28 @@ export const projects = [
     url: 'https://hbuminy.github.io/nevmoto/',
   },
   {
-    slug: 'arincicek',
-    line: 'own',
-    title: 'Arıncık',
-    category: 'Kurumsal web',
+    slug: 'kiosos',
+    line: 'product',
+    title: 'Kiosos',
+    category: 'Ürün',
     tag: 'Canlı',
-    context: 'Osware üretimi',
-    excerpt: 'Nevşehir dövme stüdyosu ve müzik için Türkçe tanıtım sitesi. Randevu Instagram DM ile.',
+    context: 'Osware ürünü',
+    excerpt: 'Kafe ve restoranlar için kiosk yazılımı, yerinde kurulum ve mobil yönetim.',
     summary:
-      'Arıncık, Nevşehir’de Arin Dövme Stüdyosu için tanıtım sitesi. Dövme ve müzik aynı sayfada; randevu @arintattoo7 hesabına Instagram mesajı ile açılır. Osware üretimi.',
+      'Kiosos, kafe ve restoranlar için kiosk yazılımı, yerinde kurulum ve mobil yönetim. Osware üretimi; kiosos.com adresinde yayında.',
     description:
-      'Nevşehir’de Arin Dövme Stüdyosu için Türkçe tanıtım sitesi. Dövme çalışmaları ve müzik bölümü aynı sayfada durur. Randevu form değil, Instagram DM (@arintattoo7) ile açılır. Müzik, YouTube kanalı @ArinOfficiall üzerinden durur. Tarayıcı başlığı Arin Dövme Stüdyosu. Osware’in ürettiği, yayında olan müşteri sitesi.',
+      'Kiosos; salondaki kiosk, yazılım katmanı ve işletmecinin cebindeki uygulama. Menü, kampanya ve müsaitlik tek yerden yönetilir. Yazılım ile donanım birlikte gelir, kurulum yerinde yapılır. Osware’in ürettiği, hâlâ yayında olan ürün.',
     scope:
-      'Osware üretimi, müşteri sitesi. Yayındaki marka Arin Dövme Stüdyosu. Adres oswaretr.github.io/arincicek.',
+      'Osware ürünü. Kafe ve restoran hattı: yazılım, yerinde kurulum, mobil yönetim. Kurulum sayısı veya müşteri adı yayınlamıyoruz; ürün kiosos.com adresinde.',
     points: [
-      'Nevşehir’de dövme stüdyosu tanıtımı. Randevu Instagram DM ile; hesap @arintattoo7.',
-      'Müzik bölümü aynı sitede. YouTube kanalı @ArinOfficiall.',
-      'Türkçe arayüz. oswaretr.github.io/arincicek adresinde yayında.',
+      'Kafe ve restoran salonuna kiosk kurulur; sipariş ekranı mekânda durur.',
+      'Menü, kampanya ve müsaitlik, işletmecinin mobil uygulamasından ünitelere gider.',
+      'Yazılım, donanım ve yerinde kurulum aynı iş. kiosos.com adresinde yayında.',
     ],
-    services: ['Kurumsal web'],
-    image: '/isler/arincicek.png',
-    alt: 'Arıncık ana sayfası ekran görüntüsü',
-    url: 'https://oswaretr.github.io/arincicek/',
-  },
-]
-
-export const team = [
-  {
-    id: 'bumin',
-    name: 'Bumin',
-    role: 'Yazılım ve IT',
-    tone: 'charcoal',
-    focus: ['Sistem', 'Altyapı', 'Teslim'],
-    bio: 'Kapsamı keser, yığını seçer, sistemi ayağa kaldırır. Web ile IT aynı masada durur: kurulum, entegrasyon, erişim, yedek ve devir onun hattı. Ara katman yok.',
-  },
-  {
-    id: 'aleyna',
-    name: 'Aleyna',
-    role: 'Grafik tasarım',
-    tone: 'steel',
-    focus: ['Kimlik', 'Düzen', 'Görsel sistem'],
-    bio: 'Ürünün duruşundan sorumlu. Tipografi, yüzey ve işaret dilini kurar; ekranda rastgele kalan bir şey bırakmaz. Kimlik ile arayüz aynı görsel sistemde durur.',
-  },
-  {
-    id: 'seda',
-    name: 'Seda',
-    role: 'Frontend geliştirme',
-    tone: 'ink',
-    focus: ['Arayüz', 'Performans', 'Üretim'],
-    bio: 'Tasarımı çalışan arayüze çevirir. Kurumsal site, panel ve ürün ekranı üretimde onun elinden çıkar. Durumlar, hız ve tarayıcı gerçeği burada biter.',
+    services: ['Web', 'Kiosk yazılımı', 'Mobil'],
+    image: '/isler/kiosos.png',
+    alt: 'Kiosos ana sayfası ekran görüntüsü',
+    url: 'https://kiosos.com',
   },
 ]
 
@@ -229,8 +146,8 @@ export const values = [
     text: 'Her isteği almayız. Ne yapılmayacağını da söyleriz. Net iş, şişkin işten iyidir.',
   },
   {
-    title: 'Aynı hatta üretiriz',
-    text: 'Tasarım, frontend ve IT üç ayrı ajans değildir. Üç kişi, tek teslim. El değiştirmez.',
+    title: 'Tek teslim',
+    text: 'Tasarım, yazılım ve IT ayrı masalara bölünmez. Aynı stüdyo, aynı teslim. El değiştirmez.',
   },
   {
     title: 'Çalışır halde bırakırız',
@@ -249,7 +166,7 @@ export const steps = [
   },
   {
     title: 'Üretim',
-    text: 'Tasarım ve geliştirme paralel yürür. Haftalık görünür çıktı vardır. İş üç kişide kalır, ara katmana devredilmez.',
+    text: 'Tasarım ve geliştirme paralel yürür. Haftalık görünür çıktı vardır. İş stüdyoda kalır, ara katmana devredilmez.',
   },
   {
     title: 'Teslim',
