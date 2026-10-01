@@ -40,15 +40,15 @@ const pages = [
     path: '/',
     name: 'home',
     title: `Osware — ${studio.location}’de web ve IT`,
-    description: `Osware, ${studio.location} merkezli web ve IT. Bumin, Aleyna, Seda — üç kişi, tek teslim. Optiviser ve Optiviser Trip çıkışlı. Canlı ürün: Kiosos.`,
-    socialDescription: `${studio.location}’de web ve IT. Bumin, Aleyna, Seda. Optiviser çıkışlı üç kişi. Canlı iş: Optiviser, Optiviser Trip, Kiosos.`,
+    description: `Osware, ${studio.location} merkezli web ve IT. Bumin, Aleyna, Seda — üç kişi, tek teslim. Optiviser ve Optiviser Trip çıkışlı. Canlı: Kiosos, NEV MOTO KLİNİK ve Arıncık.`,
+    socialDescription: `${studio.location}’de web ve IT. Bumin, Aleyna, Seda. Optiviser çıkışlı üç kişi. Canlı iş: Optiviser, Optiviser Trip, Kiosos, NEV MOTO KLİNİK, Arıncık.`,
   }),
   page({
     path: '/isler',
     name: 'work',
     title: 'İşler — Osware',
     description:
-      'Osware işleri: Optiviser ve Optiviser Trip’te ürettiğimiz canlı ürünler ve kendi kiosk yazılımımız Kiosos. Sahte katalog yok; üçü de yayında.',
+      'Osware işleri: Optiviser ve Optiviser Trip, kiosk yazılımı Kiosos, müşteri siteleri NEV MOTO KLİNİK ve Arıncık. Sahte katalog yok; hepsi yayında.',
   }),
   page({
     path: '/operasyon',

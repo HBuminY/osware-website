@@ -257,7 +257,7 @@ function viewHome() {
       <div class="hero-copy">
         <p class="eyebrow">Operasyon grubu · kuruluş ${studio.founded}</p>
         <h1 id="page-title">Osware.<br>${studio.location}’de<br>web ve IT.</h1>
-        <p class="lede">Web ve IT işini bitiririz. Osware; Bumin, Aleyna ve Seda — ${studio.location} merkezli üç kişilik üretim hattı. Kurumsal site, ürün arayüzü, kimlik ve altyapı aynı hatta yürür. ${originLine()}. Kendi ürünümüz <a href="/isler/kiosos" data-link="/isler/kiosos">Kiosos</a> da yayında.</p>
+        <p class="lede">Web ve IT işini bitiririz. Osware; Bumin, Aleyna ve Seda — ${studio.location} merkezli üç kişilik üretim hattı. Kurumsal site, ürün arayüzü, kimlik ve altyapı aynı hatta yürür. ${originLine()}. Kendi ürünümüz <a href="/isler/kiosos" data-link="/isler/kiosos">Kiosos</a> ile müşteri siteleri <a href="/isler/nevmoto" data-link="/isler/nevmoto">NEV MOTO KLİNİK</a> ve <a href="/isler/arincicek" data-link="/isler/arincicek">Arıncık</a> da yayında.</p>
         <div class="hero-actions">
           <a class="btn" href="/isler" data-link="/isler">İşlere bak</a>
           <a class="btn btn-ghost" href="/iletisim" data-link="/iletisim">Proje başlat</a>
@@ -307,8 +307,8 @@ function viewHome() {
       <div class="section-head">
         <div>
           <p class="eyebrow">Kanıt</p>
-          <h2>Üç canlı ürün</h2>
-          <p class="section-note">İkisi Optiviser dönemi, biri Osware üretimi. Hepsi yayında — sahte katalog yok.</p>
+          <h2>Canlı işler</h2>
+          <p class="section-note">İkisi Optiviser dönemi. Osware hattında Kiosos ve iki müşteri sitesi. Hepsi yayında — sahte katalog yok.</p>
         </div>
         <a class="text-btn" href="/isler" data-link="/isler">Tüm işler</a>
       </div>
@@ -363,7 +363,7 @@ function viewWork() {
     <section class="page-hero">
       <p class="eyebrow">Portföy</p>
       <h1 id="page-title">Canlı işler.</h1>
-      <p class="lede">Sahte katalog yok. Optiviser döneminde ürettiğimiz iki ürün ve Osware’in Kiosos’u — üçü de yayında, üçü de açılıp bakılır. Müşteri logosu dizmeyiz.</p>
+      <p class="lede">Sahte katalog yok. Optiviser döneminde iki ürün; Osware’de Kiosos ve iki müşteri sitesi. Hepsi yayında, hepsi açılıp bakılır. Müşteri logosu dizmeyiz.</p>
     </section>
     ${groups}
   `
@@ -457,7 +457,7 @@ function viewStudio() {
     <section class="section section-tight">
       <aside class="callout">
         <p class="eyebrow">Sınır</p>
-        <p>Portföyde logo duvarı yok. Gösterdiğimiz iş ya Optiviser döneminde ürettiğimiz üründür ya Osware’in Kiosos’udur. Üçü de canlıdadır. Uymayan işi baştan söyler, almayız.</p>
+        <p>Portföyde logo duvarı yok. Gösterdiğimiz iş ya Optiviser döneminde ürettiğimiz üründür ya Osware’in ürettiği Kiosos ile müşteri siteleridir. Hepsi canlıdadır. Uymayan işi baştan söyler, almayız.</p>
         <a class="btn" href="/iletisim" data-link="/iletisim">Proje başlat</a>
       </aside>
     </section>
