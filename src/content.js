@@ -4,9 +4,9 @@
 export const studio = {
   name: 'osware',
   email: 'contact@osware.org',
-  phone: '+90 551 043 99 79',
-  phoneHref: 'tel:+905510439979',
-  whatsappHref: 'https://wa.me/905510439979',
+  phone: '+90 551 469 56 65',
+  phoneHref: 'tel:+905514695665',
+  whatsappHref: 'https://wa.me/905514695665',
   location: 'Nevşehir',
   founded: '2026',
 }
