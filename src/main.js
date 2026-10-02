@@ -1,26 +1,7 @@
 import './style.css'
-import {
-  capabilities,
-  inquiry,
-  nav,
-  projects,
-  services,
-  steps,
-  studio,
-  values,
-  workLines,
-} from './content.js'
+import { getBundle } from './content.js'
 import { jsonLdText, metaFor } from './seo.js'
-
-// GitHub Pages redirects a directory (`/isler` → `/isler/`) and serves
-// route copies as `/operasyon/`. Match those the same as the canonical path.
-function normalizePath(path) {
-  if (!path) return '/'
-  let value = path.startsWith('/') ? path : `/${path}`
-  value = value.replace(/\/index\.html$/i, '')
-  if (value.length > 1) value = value.replace(/\/+$/, '')
-  return value || '/'
-}
+import { matchRoute, normalizePath, pathFor, switchPath } from './routes.js'
 
 function readPath() {
   return normalizePath(window.location.pathname)
@@ -34,10 +15,7 @@ const state = {
 // Where to move focus after the next render. Null on the first paint so a
 // load does not steal focus from the browser chrome.
 let pendingFocus = null
-
-function projectBySlug(slug) {
-  return projects.find((p) => p.slug === slug)
-}
+let copy = getBundle('tr')
 
 function navigate(path, { replace = false, focus = 'main' } = {}) {
   const next = normalizePath(path)
@@ -61,76 +39,92 @@ function setMenu(open, focus = open ? 'menu-open' : 'menu-close') {
   render()
 }
 
-function matchRoute(path) {
-  path = normalizePath(path)
-  const aliases = {
-    '/work': '/isler',
-    '/studio': '/operasyon',
-    '/ekip': '/operasyon',
-    '/team': '/operasyon',
-    '/contact': '/iletisim',
-  }
-  if (aliases[path]) return { name: 'redirect', to: aliases[path] }
-  if (path === '/' || path === '') return { name: 'home' }
-  if (path === '/isler') return { name: 'work' }
-  if (path === '/operasyon') return { name: 'studio' }
-  if (path === '/iletisim') return { name: 'contact' }
-  const work = path.match(/^\/isler\/([^/]+)$/)
-  if (work) return { name: 'project', slug: work[1] }
-  const old = path.match(/^\/work\/([^/]+)$/)
-  if (old) return { name: 'redirect', to: `/isler/${old[1]}` }
-  return { name: 'notfound' }
+function href(name, slug) {
+  return pathFor(copy.locale, name, slug)
+}
+
+function joinList(items) {
+  if (items.length <= 1) return items.join('')
+  if (items.length === 2) return `${items[0]} ${copy.ui.and} ${items[1]}`
+  const sep = copy.ui.oxford ? ',' : ''
+  return `${items.slice(0, -1).join(', ')}${sep} ${copy.ui.and} ${items.at(-1)}`
+}
+
+function projectLinks() {
+  return joinList(
+    copy.projects.map((project) => {
+      const path = href('project', project.slug)
+      return `<a href="${path}" data-link="${path}">${project.title}</a>`
+    }),
+  )
 }
 
 function logoMark(extraClass = '', { inert = false } = {}) {
   const classes = extraClass ? `logo ${extraClass}` : 'logo'
-  return `<a class="${classes}" href="/" data-link="/" aria-label="Osware, ana sayfa"${inert ? ' inert' : ''}>
+  const home = href('home')
+  return `<a class="${classes}" href="${home}" data-link="${home}" aria-label="${copy.ui.logoLabel}"${inert ? ' inert' : ''}>
     <img src="/osware.png" alt="" class="logo-img" />
   </a>`
 }
 
-function isNavActive(href, route) {
-  if (href === '/isler') return route.name === 'work' || route.name === 'project'
-  return state.path === href
+function isNavActive(id, route) {
+  if (id === 'work') return route.name === 'work' || route.name === 'project'
+  return route.name === id
 }
 
-function navAnchors() {
-  const route = matchRoute(state.path)
-  return nav
+function navAnchors(route) {
+  return copy.nav
     .map((item) => {
-      const active = isNavActive(item.href, route)
+      const path = href(item.id)
+      const active = isNavActive(item.id, route)
       const current = active ? ' class="is-active" aria-current="page"' : ''
-      return `<a href="${item.href}" data-link="${item.href}"${current}>${item.label}</a>`
+      return `<a href="${path}" data-link="${path}"${current}>${item.label}</a>`
     })
     .join('')
 }
 
+function langSwitch({ inert = false } = {}) {
+  const links = [
+    ['tr', 'TR', 'Türkçe'],
+    ['en', 'EN', 'English'],
+  ]
+    .map(([locale, short, name]) => {
+      const target = switchPath(state.path, locale)
+      const current = copy.locale === locale
+      const cls = current ? ' class="is-active"' : ''
+      const aria = current ? ' aria-current="true"' : ''
+      return `<a href="${target}" data-link="${target}" lang="${locale}" hreflang="${locale}"${cls}${aria}>${short}<span class="visually-hidden"> — ${name}</span></a>`
+    })
+    .join('<span aria-hidden="true">/</span>')
+  return `<nav class="lang-switch" aria-label="${copy.ui.langLabel}"${inert ? ' inert' : ''}>${links}</nav>`
+}
+
 function mailHref() {
-  const subject = encodeURIComponent('Osware — web / IT işi')
-  return `mailto:${studio.email}?subject=${subject}`
+  const subject = encodeURIComponent(copy.ui.mailSubject)
+  return `mailto:${copy.studio.email}?subject=${subject}`
 }
 
 function whatsappInquiryHref() {
-  const text = encodeURIComponent('Merhaba Osware, bir web / IT işi konuşmak istiyorum.')
-  return `${studio.whatsappHref}?text=${text}`
+  const text = encodeURIComponent(copy.ui.whatsappText)
+  return `${copy.studio.whatsappHref}?text=${text}`
 }
 
 function contactDetails() {
   return `<p class="contact-details">
-    <a href="${mailHref()}">${studio.email}</a>
-    <a href="${studio.phoneHref}">${studio.phone}</a>
-    <a href="${whatsappInquiryHref()}" target="_blank" rel="noopener noreferrer">WhatsApp<span class="visually-hidden"> (yeni sekmede)</span></a>
-    <span>${studio.location}</span>
+    <a href="${mailHref()}">${copy.studio.email}</a>
+    <a href="${copy.studio.phoneHref}">${copy.studio.phone}</a>
+    <a href="${whatsappInquiryHref()}" target="_blank" rel="noopener noreferrer">WhatsApp<span class="visually-hidden"> (${copy.ui.newTab})</span></a>
+    <span>${copy.studio.location}</span>
   </p>`
 }
 
 function whatsappFab() {
   return `<a
     class="whatsapp-fab"
-    href="${studio.whatsappHref}"
+    href="${copy.studio.whatsappHref}"
     target="_blank"
     rel="noopener noreferrer"
-    aria-label="WhatsApp ile yazın (yeni sekmede)"${state.menuOpen ? ' inert' : ''}
+    aria-label="${copy.ui.whatsappFab}"${state.menuOpen ? ' inert' : ''}
   >
     <svg viewBox="0 0 24 24" aria-hidden="true">
       <path fill="currentColor" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.435 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/>
@@ -138,70 +132,76 @@ function whatsappFab() {
   </a>`
 }
 
-function renderHeader() {
+function renderHeader(route) {
   const open = state.menuOpen
   const inert = open ? ' inert' : ''
-  const links = navAnchors()
-  const menuLabel = open ? 'Menüyü kapat' : 'Menüyü aç'
+  const links = navAnchors(route)
+  const menuLabel = open ? copy.ui.menuClose : copy.ui.menuOpen
+  const contact = href('contact')
 
   return `
-    <a class="skip" href="#view"${inert}>İçeriğe geç</a>
+    <a class="skip" href="#view"${inert}>${copy.ui.skip}</a>
     <header class="site-header">
       <div class="header-inner">
         ${logoMark('', { inert: open })}
-        <nav class="desktop-nav" aria-label="Ana menü"${inert}>${links}</nav>
+        <nav class="desktop-nav" aria-label="${copy.ui.mainNav}"${inert}>${links}</nav>
         <div class="header-actions">
-          <a class="btn btn-sm header-cta" href="/iletisim" data-link="/iletisim"${inert}>Proje başlat</a>
+          ${langSwitch({ inert: open })}
+          <a class="btn btn-sm header-cta" href="${contact}" data-link="${contact}"${inert}>${copy.ui.cta}</a>
           <button type="button" class="menu-btn" data-action="toggle-menu" aria-controls="site-menu" aria-expanded="${open}" aria-haspopup="dialog" aria-label="${menuLabel}">
             <span aria-hidden="true"></span><span aria-hidden="true"></span>
           </button>
         </div>
       </div>
     </header>
-    <div id="site-menu" class="mobile-nav${open ? ' is-open' : ''}"${open ? ' role="dialog" aria-modal="true" aria-label="Menü"' : ' hidden'}>
-      <nav aria-label="Mobil menü">${links}</nav>
-      <a class="btn" href="/iletisim" data-link="/iletisim">Proje başlat</a>
+    <div id="site-menu" class="mobile-nav${open ? ' is-open' : ''}"${open ? ' role="dialog" aria-modal="true" aria-label="' + copy.ui.menuDialog + '"' : ' hidden'}>
+      <nav class="mobile-nav-links" aria-label="${copy.ui.mobileNav}">${links}</nav>
+      ${langSwitch()}
+      <a class="btn" href="${contact}" data-link="${contact}">${copy.ui.cta}</a>
     </div>
     <div class="scrim${open ? ' is-on' : ''}" data-action="close-overlays" aria-hidden="true"></div>
   `
 }
 
-function renderFooter() {
+function renderFooter(route) {
   const inert = state.menuOpen ? ' inert' : ''
+  const contact = href('contact')
   return `
     <footer class="site-footer"${inert}>
       <div class="footer-cta">
-        <p class="eyebrow">Sonraki iş</p>
-        <h2>Kapsam netse başlarız.</h2>
-        <p>Web, IT veya kimlik. Kapsamı birlikte keseriz. Uymuyorsa onu da söyleriz.</p>
-        <a class="btn btn-invert" href="/iletisim" data-link="/iletisim">Proje başlat</a>
+        <p class="eyebrow">${copy.ui.footerEyebrow}</p>
+        <h2>${copy.ui.footerTitle}</h2>
+        <p>${copy.ui.footerText}</p>
+        <a class="btn btn-invert" href="${contact}" data-link="${contact}">${copy.ui.cta}</a>
       </div>
       <div class="footer-grid">
         <div>
           ${logoMark('logo-footer')}
-          <p class="muted">Osware — ${studio.location}’de web geliştirme ve IT stüdyosu. Kuruluş ${studio.founded}.</p>
+          <p class="muted">${copy.ui.footerBlurb}</p>
           ${contactDetails()}
+          ${langSwitch()}
         </div>
-        <nav aria-label="Sayfalar">
-          <p class="eyebrow" aria-hidden="true">Sayfalar</p>
+        <nav aria-label="${copy.ui.pagesLabel}">
+          <p class="eyebrow" aria-hidden="true">${copy.ui.pagesLabel}</p>
           <ul class="footer-links">
-            ${nav
+            ${copy.nav
               .map((item) => {
-                const active = isNavActive(item.href, matchRoute(state.path))
+                const path = href(item.id)
+                const active = isNavActive(item.id, route)
                 const current = active ? ' aria-current="page"' : ''
-                return `<li><a href="${item.href}" data-link="${item.href}"${current}>${item.label}</a></li>`
+                return `<li><a href="${path}" data-link="${path}"${current}>${item.label}</a></li>`
               })
               .join('')}
           </ul>
         </nav>
-        <nav aria-label="İşler">
-          <p class="eyebrow" aria-hidden="true">İşler</p>
+        <nav aria-label="${copy.ui.workLabel}">
+          <p class="eyebrow" aria-hidden="true">${copy.ui.workLabel}</p>
           <ul class="footer-links">
-            ${projects
-              .map(
-                (p) =>
-                  `<li><a href="/isler/${p.slug}" data-link="/isler/${p.slug}">${p.title}</a></li>`,
-              )
+            ${copy.projects
+              .map((project) => {
+                const path = href('project', project.slug)
+                return `<li><a href="${path}" data-link="${path}">${project.title}</a></li>`
+              })
               .join('')}
           </ul>
         </nav>
@@ -210,109 +210,113 @@ function renderFooter() {
   `
 }
 
-function workCard(p, level = 3) {
-  const title = level === 2 ? `<h2 class="card-title">${p.title}</h2>` : `<h3>${p.title}</h3>`
+function workCard(project, level = 3) {
+  const path = href('project', project.slug)
+  const title = level === 2 ? `<h2 class="card-title">${project.title}</h2>` : `<h3>${project.title}</h3>`
   return `
     <article class="card">
-      <a class="card-media" href="/isler/${p.slug}" data-link="/isler/${p.slug}">
-        ${p.tag ? `<span class="chip">${p.tag}</span>` : ''}
-        <img src="${p.image}" alt="${p.alt}" />
+      <a class="card-media" href="${path}" data-link="${path}">
+        ${project.tag ? `<span class="chip">${project.tag}</span>` : ''}
+        <img src="${project.image}" alt="${project.alt}" />
       </a>
       <div class="card-body">
         <div>
-          <a href="/isler/${p.slug}" data-link="/isler/${p.slug}">${title}</a>
-          <p class="muted">${p.context}</p>
-          <p class="card-excerpt">${p.excerpt}</p>
+          <a href="${path}" data-link="${path}">${title}</a>
+          <p class="muted">${project.context}</p>
+          <p class="card-excerpt">${project.excerpt}</p>
         </div>
-        <a class="text-btn" href="/isler/${p.slug}" data-link="/isler/${p.slug}">İncele</a>
+        <a class="text-btn" href="${path}" data-link="${path}">${copy.ui.viewWork}</a>
       </div>
     </article>
   `
 }
 
-function serviceCard(s, { detail = false } = {}) {
+function serviceCard(service, { detail = false } = {}) {
   return `
     <article class="service-card">
-      <span class="code">${s.code}</span>
-      <h3>${s.title}</h3>
-      <p>${s.lead}</p>
-      ${detail ? `<p>${s.detail}</p>` : ''}
+      <span class="code">${service.code}</span>
+      <h3>${service.title}</h3>
+      <p>${service.lead}</p>
+      ${detail ? `<p>${service.detail}</p>` : ''}
     </article>`
 }
 
 function viewHome() {
+  const work = href('work')
+  const contact = href('contact')
+  const studioPage = href('studio')
   return `
     <section class="hero">
       <div class="hero-copy">
-        <p class="eyebrow">Web ve IT stüdyosu · ${studio.location}</p>
-        <h1 id="page-title">Osware.<br>${studio.location}’de<br>web ve IT.</h1>
-        <p class="lede">Web ve IT işini teslim ederiz. Kurumsal site, ürün arayüzü, kimlik ve altyapı aynı hatta yürür. Kapsam yazılır, sistem yayına çıkar, devir tamamlanır. Canlı iş: <a href="/isler/arincicek" data-link="/isler/arincicek">Arin Çiçek</a>, <a href="/isler/nevmoto" data-link="/isler/nevmoto">NEV MOTO KLİNİK</a> ve <a href="/isler/kiosos" data-link="/isler/kiosos">Kiosos</a>.</p>
+        <p class="eyebrow">${copy.ui.homeEyebrow}</p>
+        <h1 id="page-title">${copy.ui.homeTitle}</h1>
+        <p class="lede">${copy.ui.homeLede} ${projectLinks()}.</p>
         <div class="hero-actions">
-          <a class="btn" href="/isler" data-link="/isler">İşlere bak</a>
-          <a class="btn btn-ghost" href="/iletisim" data-link="/iletisim">Proje başlat</a>
+          <a class="btn" href="${work}" data-link="${work}">${copy.ui.seeWork}</a>
+          <a class="btn btn-ghost" href="${contact}" data-link="${contact}">${copy.ui.cta}</a>
         </div>
         <dl class="hero-meta">
-          <div><dt>Alan</dt><dd>Web + IT</dd></div>
-          <div><dt>Konum</dt><dd>${studio.location}</dd></div>
-          <div><dt>Kuruluş</dt><dd>${studio.founded}</dd></div>
+          <div><dt>${copy.ui.field}</dt><dd>${copy.ui.fieldValue}</dd></div>
+          <div><dt>${copy.ui.locationLabel}</dt><dd>${copy.studio.location}</dd></div>
+          <div><dt>${copy.ui.foundedLabel}</dt><dd>${copy.studio.founded}</dd></div>
         </dl>
       </div>
       <aside class="hero-panel">
-        <p class="hero-panel-kicker">Kuruluş ${studio.founded}</p>
-        <p class="hero-panel-lead">Web, IT ve arayüz. Aynı stüdyo, aynı teslim.</p>
+        <p class="hero-panel-kicker">${copy.ui.panelKicker}</p>
+        <p class="hero-panel-lead">${copy.ui.panelLead}</p>
         <ul class="hero-stack">
-          ${services.map((s) => `<li><span>${s.code}</span>${s.title}</li>`).join('')}
+          ${copy.services.map((service) => `<li><span>${service.code}</span>${service.title}</li>`).join('')}
         </ul>
       </aside>
     </section>
 
     <div class="band">
-      <h2 class="visually-hidden">Yetenekler</h2>
+      <h2 class="visually-hidden">${copy.ui.capabilitiesLabel}</h2>
       <ul>
-        ${capabilities.map((item) => `<li>${item}</li>`).join('')}
+        ${copy.capabilities.map((item) => `<li>${item}</li>`).join('')}
       </ul>
     </div>
 
     <section class="section">
       <div class="section-head">
         <div>
-          <p class="eyebrow">Hizmet</p>
-          <h2>Web, IT, arayüz</h2>
+          <p class="eyebrow">${copy.ui.servicesEyebrow}</p>
+          <h2>${copy.ui.servicesTitle}</h2>
         </div>
       </div>
       <div class="service-grid">
-        ${services.map((s) => serviceCard(s)).join('')}
+        ${copy.services.map((service) => serviceCard(service)).join('')}
       </div>
     </section>
 
     <section class="section section-tight">
       <div class="section-head">
         <div>
-          <p class="eyebrow">Seçilmiş iş</p>
-          <h2>Canlı işler</h2>
-          <p class="section-note">Müşteri siteleri önde: Arin Çiçek ve NEV MOTO KLİNİK. Kendi ürünümüz Kiosos aynı listede. Hepsi yayında.</p>
+          <p class="eyebrow">${copy.ui.selectedEyebrow}</p>
+          <h2>${copy.ui.selectedTitle}</h2>
+          <p class="section-note">${copy.ui.selectedNote}</p>
         </div>
-        <a class="text-btn" href="/isler" data-link="/isler">Tüm işler</a>
+        <a class="text-btn" href="${work}" data-link="${work}">${copy.ui.allWork}</a>
       </div>
       <div class="work-grid">
-        ${projects.map((p) => workCard(p)).join('')}
+        ${copy.projects.map((project) => workCard(project)).join('')}
       </div>
     </section>
 
     <section class="split">
       <div class="split-copy">
-        <p class="eyebrow">Yaklaşım</p>
-        <h2>Karar ve üretim aynı hatta.</h2>
-        <p>Ara katman yok. Kapsam, tasarım, yazılım ve IT tek teslimde birleşir. İş ${studio.location}’den yürür; yayındaki sistem, erişim ve devir ile kapanır.</p>
-        <a class="btn btn-ghost" href="/operasyon" data-link="/operasyon">Hizmetleri gör</a>
+        <p class="eyebrow">${copy.ui.approachEyebrow}</p>
+        <h2>${copy.ui.approachTitle}</h2>
+        <p>${copy.ui.approachText}</p>
+        <a class="btn btn-ghost" href="${studioPage}" data-link="${studioPage}">${copy.ui.seeServices}</a>
       </div>
       <div class="split-facts">
-        ${values
+        ${copy.values
           .map(
-            (v) => `
+            (value) => `
           <article>
-            <h3>${v.title}</h3>
-            <p>${v.text}</p>
+            <h3>${value.title}</h3>
+            <p>${value.text}</p>
           </article>`,
           )
           .join('')}
@@ -322,9 +326,9 @@ function viewHome() {
 }
 
 function viewWork() {
-  const groups = workLines
+  const groups = copy.workLines
     .map((line) => {
-      const items = projects.filter((p) => p.line === line.id)
+      const items = copy.projects.filter((project) => project.line === line.id)
       return `
         <section class="work-group">
           <div class="section-head">
@@ -335,7 +339,7 @@ function viewWork() {
             </div>
           </div>
           <div class="work-grid ${items.length === 1 ? 'work-grid-1' : items.length === 2 ? 'work-grid-2' : ''}">
-            ${items.map((p) => workCard(p)).join('')}
+            ${items.map((project) => workCard(project)).join('')}
           </div>
         </section>`
     })
@@ -343,51 +347,52 @@ function viewWork() {
 
   return `
     <section class="page-hero">
-      <p class="eyebrow">Portföy</p>
-      <h1 id="page-title">Canlı işler.</h1>
-      <p class="lede">Sahte katalog yok. Gösterdiğimiz her iş yayında ve açılıp bakılır. Müşteri siteleri önde; ürünümüz Kiosos aynı portföyde.</p>
+      <p class="eyebrow">${copy.ui.workEyebrow}</p>
+      <h1 id="page-title">${copy.ui.workTitle}</h1>
+      <p class="lede">${copy.ui.workLede}</p>
     </section>
     ${groups}
   `
 }
 
 function viewProject(slug) {
-  const p = projectBySlug(slug)
-  if (!p) return viewNotFound()
-  const related = projects.filter((x) => x.slug !== p.slug).slice(0, 3)
+  const project = copy.projects.find((item) => item.slug === slug)
+  if (!project) return viewNotFound()
+  const related = copy.projects.filter((item) => item.slug !== project.slug).slice(0, 3)
+  const contact = href('contact')
   return `
     <article class="case">
       <div class="case-media">
-        <img src="${p.image}" alt="${p.alt}" />
+        <img src="${project.image}" alt="${project.alt}" />
       </div>
       <div class="case-info">
-        <p class="eyebrow">${p.context}</p>
-        <h1 id="page-title">${p.title}</h1>
-        <p class="lede">${p.excerpt}</p>
+        <p class="eyebrow">${project.context}</p>
+        <h1 id="page-title">${project.title}</h1>
+        <p class="lede">${project.excerpt}</p>
         <dl class="case-meta">
-          <div><dt>Durum</dt><dd>${p.tag}</dd></div>
-          <div><dt>Tür</dt><dd>${p.context}</dd></div>
-          <div><dt>Kapsam</dt><dd>${p.services.join(' · ')}</dd></div>
+          <div><dt>${copy.ui.status}</dt><dd>${project.tag}</dd></div>
+          <div><dt>${copy.ui.type}</dt><dd>${project.context}</dd></div>
+          <div><dt>${copy.ui.scope}</dt><dd>${project.services.join(' · ')}</dd></div>
         </dl>
-        <p>${p.description}</p>
+        <p>${project.description}</p>
         <ul class="fact-list">
-          ${p.points.map((point) => `<li>${point}</li>`).join('')}
+          ${project.points.map((point) => `<li>${point}</li>`).join('')}
         </ul>
         <aside class="callout">
-          <p class="eyebrow">Teslim</p>
-          <p>${p.scope}</p>
+          <p class="eyebrow">${copy.ui.delivery}</p>
+          <p>${project.scope}</p>
         </aside>
         <div class="case-actions">
-          <a class="btn" href="${p.url}" target="_blank" rel="noopener noreferrer">Siteyi aç<span class="visually-hidden"> (yeni sekmede)</span></a>
-          <a class="btn btn-ghost" href="/iletisim" data-link="/iletisim">Proje başlat</a>
+          <a class="btn" href="${project.url}" target="_blank" rel="noopener noreferrer">${copy.ui.openSite}<span class="visually-hidden"> (${copy.ui.newTab})</span></a>
+          <a class="btn btn-ghost" href="${contact}" data-link="${contact}">${copy.ui.cta}</a>
         </div>
       </div>
     </article>
     <section class="section">
       <div class="section-head">
         <div>
-          <p class="eyebrow">Devamı</p>
-          <h2>Diğer canlı işler</h2>
+          <p class="eyebrow">${copy.ui.moreEyebrow}</p>
+          <h2>${copy.ui.moreTitle}</h2>
         </div>
       </div>
       <div class="work-grid work-grid-2">
@@ -398,39 +403,40 @@ function viewProject(slug) {
 }
 
 function viewStudio() {
+  const contact = href('contact')
   return `
     <section class="page-hero">
-      <p class="eyebrow">Stüdyo · ${studio.location}</p>
-      <h1 id="page-title">Net kapsam.<br>Çalışan teslim.</h1>
-      <p class="lede">Osware, ${studio.founded}’da ${studio.location}’de kurulmuş bir web ve IT stüdyosudur. İşi alır, kapsamını keser, üretir ve çalışan halde bırakır.</p>
+      <p class="eyebrow">${copy.ui.studioEyebrow}</p>
+      <h1 id="page-title">${copy.ui.studioTitle}</h1>
+      <p class="lede">${copy.ui.studioLede}</p>
     </section>
     <section class="section">
       <div class="section-head">
         <div>
-          <p class="eyebrow">Ne alırız</p>
-          <h2>Web, IT, arayüz</h2>
-          <p class="section-note">Web, IT ve arayüz. Birlikte ya da ayrı yürür; teslim tektir.</p>
+          <p class="eyebrow">${copy.ui.takesEyebrow}</p>
+          <h2>${copy.ui.servicesTitle}</h2>
+          <p class="section-note">${copy.ui.takesNote}</p>
         </div>
       </div>
       <div class="service-grid">
-        ${services.map((s) => serviceCard(s, { detail: true })).join('')}
+        ${copy.services.map((service) => serviceCard(service, { detail: true })).join('')}
       </div>
     </section>
     <section class="section section-tight">
       <div class="section-head">
         <div>
-          <p class="eyebrow">Hat</p>
-          <h2>Nasıl yürür</h2>
+          <p class="eyebrow">${copy.ui.lineEyebrow}</p>
+          <h2>${copy.ui.lineTitle}</h2>
         </div>
       </div>
       <div class="process">
-        ${steps
+        ${copy.steps
           .map(
-            (s, i) => `
+            (step, index) => `
           <article class="process-step">
-            <span class="code">${String(i + 1).padStart(2, '0')}</span>
-            <h3>${s.title}</h3>
-            <p>${s.text}</p>
+            <span class="code">${String(index + 1).padStart(2, '0')}</span>
+            <h3>${step.title}</h3>
+            <p>${step.text}</p>
           </article>`,
           )
           .join('')}
@@ -438,9 +444,9 @@ function viewStudio() {
     </section>
     <section class="section section-tight">
       <aside class="callout">
-        <p class="eyebrow">Sınır</p>
-        <p>Portföyde logo duvarı yok. Gösterdiğimiz iş, ürettiğimiz müşteri siteleri ile kendi ürünümüz Kiosos’tur. Hepsi canlıdadır. Uymayan işi baştan söyler, almayız.</p>
-        <a class="btn" href="/iletisim" data-link="/iletisim">Proje başlat</a>
+        <p class="eyebrow">${copy.ui.limitEyebrow}</p>
+        <p>${copy.ui.limitText}</p>
+        <a class="btn" href="${contact}" data-link="${contact}">${copy.ui.cta}</a>
       </aside>
     </section>
   `
@@ -449,64 +455,64 @@ function viewStudio() {
 function viewContact() {
   return `
     <section class="page-hero">
-      <p class="eyebrow">İletişim · ${studio.location}</p>
-      <h1 id="page-title">İşi doğrudan konuşun.</h1>
-      <p class="lede">Web veya IT işi için yazın. ${studio.location} — e-posta, telefon ve WhatsApp. Form yok; mesaj doğrudan stüdyoya düşer. Uygunsa keşif, değilse net bir hayır.</p>
+      <p class="eyebrow">${copy.ui.contactEyebrow}</p>
+      <h1 id="page-title">${copy.ui.contactTitle}</h1>
+      <p class="lede">${copy.ui.contactLede}</p>
     </section>
     <div class="contact-channels">
       <a class="channel" href="${mailHref()}">
-        <span class="eyebrow">E-posta</span>
-        <strong>${studio.email}</strong>
-        <span class="text-btn">Yaz</span>
+        <span class="eyebrow">${copy.ui.email}</span>
+        <strong>${copy.studio.email}</strong>
+        <span class="text-btn">${copy.ui.write}</span>
       </a>
-      <a class="channel" href="${studio.phoneHref}">
-        <span class="eyebrow">Telefon</span>
-        <strong>${studio.phone}</strong>
-        <span class="text-btn">Ara</span>
+      <a class="channel" href="${copy.studio.phoneHref}">
+        <span class="eyebrow">${copy.ui.phone}</span>
+        <strong>${copy.studio.phone}</strong>
+        <span class="text-btn">${copy.ui.call}</span>
       </a>
       <a class="channel" href="${whatsappInquiryHref()}" target="_blank" rel="noopener noreferrer">
         <span class="eyebrow">WhatsApp</span>
-        <strong>${studio.phone}</strong>
-        <span class="text-btn">Yaz<span class="visually-hidden"> (yeni sekmede)</span></span>
+        <strong>${copy.studio.phone}</strong>
+        <span class="text-btn">${copy.ui.write}<span class="visually-hidden"> (${copy.ui.newTab})</span></span>
       </a>
       <div class="channel">
-        <span class="eyebrow">Nereden</span>
-        <strong>${studio.location}</strong>
-        <span class="muted">Kuruluş ${studio.founded}</span>
+        <span class="eyebrow">${copy.ui.from}</span>
+        <strong>${copy.studio.location}</strong>
+        <span class="muted">${copy.ui.foundedLine}</span>
       </div>
     </div>
     <div class="inquiry">
       <div>
-        <h2>İlk mesajda bunlar yeter.</h2>
+        <h2>${copy.ui.inquiryTitle}</h2>
         <ul class="fact-list">
-          ${inquiry.map((item) => `<li>${item}</li>`).join('')}
+          ${copy.inquiry.map((item) => `<li>${item}</li>`).join('')}
         </ul>
       </div>
       <aside class="inquiry-card">
-        <p class="eyebrow">Stüdyo</p>
+        <p class="eyebrow">${copy.ui.studioAside}</p>
         <ul class="aside-list">
-          ${services.map((s) => `<li><strong>${s.title}</strong></li>`).join('')}
+          ${copy.services.map((service) => `<li><strong>${service.title}</strong></li>`).join('')}
         </ul>
-        <p>Aracı yok. İlk yazıda kapsam yeter. Uygun iş keşfe alınır.</p>
-        <a class="btn btn-invert" href="${mailHref()}">E-posta yaz</a>
+        <p>${copy.ui.inquiryNote}</p>
+        <a class="btn btn-invert" href="${mailHref()}">${copy.ui.writeEmail}</a>
       </aside>
     </div>
   `
 }
 
 function viewNotFound() {
+  const work = href('work')
   return `
     <section class="page-hero">
       <p class="eyebrow">404</p>
-      <h1 id="page-title">Bu adres yok.</h1>
-      <p class="lede">Bu sayfa Osware’de yok. İşlere dönün.</p>
-      <a class="btn" href="/isler" data-link="/isler">İşler</a>
+      <h1 id="page-title">${copy.ui.notFoundTitle}</h1>
+      <p class="lede">${copy.ui.notFoundLede}</p>
+      <a class="btn" href="${work}" data-link="${work}">${copy.ui.notFoundCta}</a>
     </section>
   `
 }
 
-function renderView() {
-  const route = matchRoute(state.path)
+function renderView(route) {
   switch (route.name) {
     case 'home':
       return viewHome()
@@ -530,6 +536,7 @@ function render() {
     return
   }
 
+  copy = getBundle(route.locale)
   const app = document.querySelector('#app')
   const focus = pendingFocus
   pendingFocus = null
@@ -537,9 +544,9 @@ function render() {
   document.body.classList.toggle('lock', state.menuOpen)
 
   app.innerHTML = `
-    ${renderHeader()}
-    <main id="view" class="view" tabindex="-1" aria-labelledby="page-title"${state.menuOpen ? ' inert' : ''}>${renderView()}</main>
-    ${renderFooter()}
+    ${renderHeader(route)}
+    <main id="view" class="view" tabindex="-1" aria-labelledby="page-title"${state.menuOpen ? ' inert' : ''}>${renderView(route)}</main>
+    ${renderFooter(route)}
     ${whatsappFab()}
   `
   moveFocus(focus)
@@ -558,7 +565,10 @@ function moveFocus(mode) {
 function applyDocumentMeta(route) {
   const meta = metaFor(route, state.path)
   document.title = meta.title
+  document.documentElement.lang = meta.htmlLang
   setMeta('meta[name="description"]', meta.description)
+  setMeta('meta[property="og:locale"]', meta.ogLocale)
+  setMeta('meta[property="og:locale:alternate"]', meta.ogLocaleAlternate)
   setMeta('meta[property="og:title"]', meta.title)
   setMeta('meta[property="og:description"]', meta.socialDescription)
   setMeta('meta[property="og:url"]', meta.url)
@@ -574,9 +584,24 @@ function applyDocumentMeta(route) {
   const canonical = document.head.querySelector('link[rel="canonical"]')
   if (!canonical) throw new Error('Missing canonical link')
   canonical.setAttribute('href', meta.url)
+  applyAlternates(meta.alternates, canonical)
   const ld = document.head.querySelector('script[type="application/ld+json"]')
   if (!ld) throw new Error('Missing json-ld')
   ld.textContent = jsonLdText(meta)
+}
+
+function applyAlternates(alternates, canonical) {
+  document.head.querySelectorAll('link[rel="alternate"][hreflang]').forEach((el) => el.remove())
+  if (!alternates) return
+  let anchor = canonical
+  for (const lang of ['tr', 'en', 'x-default']) {
+    const el = document.createElement('link')
+    el.rel = 'alternate'
+    el.hreflang = lang
+    el.href = alternates[lang]
+    anchor.insertAdjacentElement('afterend', el)
+    anchor = el
+  }
 }
 
 function setMeta(selector, value) {
