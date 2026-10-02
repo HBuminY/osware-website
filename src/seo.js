@@ -135,7 +135,7 @@ export function jsonLdText(meta) {
         name: 'Osware',
         url: canonicalUrl(pathFor(locale, 'home')),
         email: studio.email,
-        telephone: '+905510439979',
+        telephone: studio.phoneHref.replace('tel:', ''),
         areaServed: {
           '@type': 'City',
           name: studio.location,
